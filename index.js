@@ -36,8 +36,9 @@ bot.on('ready', () => {
 var updateProfil = async function() {
   try {
     for (let i = 0; i < listeProfile.length; i++ ) {
-      listeProfile[i].name = listeProfile[i].name.replace(/#/g,"-")
-      var stats = await ow.getAllStats(listeProfile[i].name, 'pc');
+      listeProfile[i].name = listeProfile[i].name.replace(/-/g,"#")
+      console.log(listeProfile[i].name.replace(/-/g,"#"))
+      var stats = await ow.getAllStats(listeProfile[i].name.replace(/-/g,"#"), 'pc'); //ICCICICIICICI
       if(listeProfile[i].tankSr[9] != (stats.rank.tank? stats.rank.tank.sr : 0) || listeProfile[i].dpsSr[9] != (stats.rank.damage? stats.rank.damage.sr : 0)  || listeProfile[i].supportSr[9] != (stats.rank.support? stats.rank.support.sr : 0)) {
         let listeSrTank = listeProfile[i].tankSr
         let listeSrDps = listeProfile[i].dpsSr
@@ -410,5 +411,5 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     }
   }
 })
-console.log(process.env.BOT_TOKEN)
+
 bot.login(process.env.BOT_TOKEN)
