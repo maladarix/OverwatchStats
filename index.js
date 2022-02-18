@@ -410,5 +410,5 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     }
   }
 })
-
+console.log(process.env.BOT_TOKEN)
 bot.login(process.env.BOT_TOKEN)
