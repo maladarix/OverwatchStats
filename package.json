@@ -1,0 +1,17 @@
+{
+  "name": "statsoverwatch",
+  "version": "1.0.0",
+  "description": "Stats for Overwatch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Maladarix",
+  "license": "ISC",
+  "dependencies": {
+    "chartjs-to-image": "^1.0.5",
+    "overwatch-stats-api": "^2.1.0",
+    "owapi": "^2.1.1"
+  }
+}
