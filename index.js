@@ -37,8 +37,7 @@ var updateProfil = async function() {
   try {
     for (let i = 0; i < listeProfile.length; i++ ) {
       listeProfile[i].name = listeProfile[i].name.replace(/-/g,"#")
-      console.log(listeProfile[i].name.replace(/-/g,"#"))
-      var stats = await ow.getAllStats(listeProfile[i].name.replace(/-/g,"#"), 'pc'); //ICCICICIICICI
+      var stats = await ow.getAllStats(listeProfile[i].name.replace(/#/g,"-"), 'pc');
       if(listeProfile[i].tankSr[9] != (stats.rank.tank? stats.rank.tank.sr : 0) || listeProfile[i].dpsSr[9] != (stats.rank.damage? stats.rank.damage.sr : 0)  || listeProfile[i].supportSr[9] != (stats.rank.support? stats.rank.support.sr : 0)) {
         let listeSrTank = listeProfile[i].tankSr
         let listeSrDps = listeProfile[i].dpsSr
@@ -52,17 +51,14 @@ var updateProfil = async function() {
         listeProfile[i].tankSr = listeSrTank
         listeProfile[i].dpsSr = listeSrDps
         listeProfile[i].supportSr = listeSrSupport
+        fs.writeFile('./src/data.json', JSON.stringify(listeProfile), 'utf8', function(err) {
+          if (err) throw err;
+        })  
         messageUpdate(listeProfile[i])
       }else{
         console.log("Rien")
       }
     }
-    
-    setTimeout(() => {
-      fs.writeFile('./src/data.json', JSON.stringify(listeProfile), 'utf8', function(err) {
-        if (err) throw err;
-      })  
-    }, 10000);
   }
   catch (error) {
     console.log(error)
@@ -135,6 +131,7 @@ var messageUpdate = function(profil) {
     try {
       bot.channels.cache.get(channel).send(new Discord.MessageEmbed()
       .setTitle(`${profil.nickName} vient de finir une session! Voici un résumé:`)
+      .setThumbnail(profil.thumbnail)
       .addFields(
         {name: `Tank`, value: `${(profil.tankSr[9] - profil.tankSr[8]) < 0 ? '🔴': (profil.tankSr[9] - profil.tankSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.tankSr[9] - profil.tankSr[8]}`, inline: true},
         {name: `Dps`, value: `${(profil.dpsSr[9] - profil.dpsSr[8]) < 0 ? '🔴': (profil.dpsSr[9] - profil.dpsSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.dpsSr[9] - profil.dpsSr[8]}`, inline: true},
@@ -186,7 +183,7 @@ setInterval(
     } catch (error) {
       console.log(error)
     }
-  }, /*1800000*/300000);
+  }, /*1800000*/30000);
 
 
 bot.on("message", async (message) => {
@@ -199,23 +196,23 @@ bot.on("message", async (message) => {
 
   if(cmd == "addprofile") {
     try {
-      var compte = Object.entries(await owapi.getAccountByName(args[0]))
-      for (let i = 0; i < compte.length; i++) {
-        if(compte[i][1].platform == "pc") {
-          compte = compte[i][1]
+      var compte1 = Object.entries(await owapi.getAccountByName(args[0]))
+      for (let i = 0; i < compte1.length; i++) {
+        if(compte1[i][1].platform == "pc") {
+          compte1 = compte1[i][1]
         }else{
           throw ('PLAYER_NOT_EXIST')
         }
       }
-      let owCompte = await ow.getBasicInfo(compte.urlName, "pc")
-      compte1 = await owapi.getGeneralStats(compte.urlName, "pc")
-      let mostplayed = Object.entries((await ow.getMostPlayed(compte.urlName, "pc")).competitive)
-      nomCompte = compte.name
-      console.log(compte)
+      let owCompte = await ow.getBasicInfo(compte1.urlName, "pc")
+      compte1 = await owapi.getGeneralStats(compte1.urlName, "pc")
+      let mostplayed = Object.entries((await ow.getMostPlayed(compte1.urlName, "pc")).competitive)
+      nomCompte = compte1.name
+      console.log(compte1)
 
       let messageConf = (new Discord.MessageEmbed()
       .setImage(mostplayed[0][1].img)
-      .setTitle(`**${compte.name}** profile`)
+      .setTitle(`**${compte1.name}** profile`)
       .addFields(
         ((await owCompte).rank.tank) ? {name: `🛡️`, value: (await owCompte).rank.tank.sr, inline: true} : {name: `🛡️`, value: "---", inline: true},
         ((await owCompte).rank.damage) ? {name: `⚔️`, value: (await owCompte).rank.damage.sr, inline: true} : {name: `⚔️`, value: "---", inline: true},
@@ -302,7 +299,7 @@ bot.on("message", async (message) => {
         }
       },
     })
-    a
+    
     .setWidth(1000)
     .setHeight(500)
     .setBackgroundColor('transparent');
@@ -340,22 +337,23 @@ bot.on("message", async (message) => {
 
   else if(cmd == "herostats") {
     try {
-      var compte = Object.entries(await owapi.getAccountByName(args[0]))
-      for (let i = 0; i < compte.length; i++) {
-        if(compte[i][1].platform == "pc") {
-          compte = compte[i][1]
+      var compte1 = Object.entries(await owapi.getAccountByName(args[0]))
+      for (let i = 0; i < compte1.length; i++) {
+        if(compte1[i][1].platform == "pc") {
+          compte1 = compte1[i][1]
         }else{
           throw ('PLAYER_NOT_EXIST')
         }
       }
 
-      let account = await owapi.getModeStats(compte.urlName, "competitive", "pc")
+      let account = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
       if(!account.hero_list.includes(args[1].toLowerCase())) return message.reply(`Héro inconnu ou aucune données disponibles`)
+
       let messageHeroStats = new Discord.MessageEmbed()
-      .setTitle(`Stats de ${compte.name.split("#")[0]} avec ${capitalize(args[1].toUpperCase())}`)
+      .setTitle(`Stats de ${compte1.name.split("#")[0]} avec ${capitalize(args[1].toUpperCase())}`)
       .setColor(color)
-      .setImage((await ow.getAllStats(compte.urlName, "pc")).mostPlayed.competitive[`${args[1].toLowerCase()}`].img)
-      .setThumbnail((await owapi.getGeneralStats(compte.urlName, "pc")).profile)
+      .setImage((await ow.getAllStats(compte1.urlName, "pc")).mostPlayed.competitive[`${args[1].toLowerCase()}`].img)
+      .setThumbnail((await owapi.getGeneralStats(compte1.urlName, "pc")).profile)
       .addFields(
         {name: "Temps de jeu", value: `${account.career_stats[args[1].toLowerCase()]['Game']['TimePlayed']}`, inline: false},
         {name: "WinRate", value: `${isNaN(((account.career_stats[args[1].toLowerCase()]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']) * 100).toFixed(2)) ? 0 : ((account.career_stats[args[1].toLowerCase()]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']) * 100).toFixed(2)} %`, inline: false},
@@ -377,6 +375,57 @@ bot.on("message", async (message) => {
         return;
       }else if(err == 'ACCOUNT_PRIVATE') {
         message.reply('La carrière de ce compte est privée!')
+        return;
+      }
+    }
+  }
+
+  else if(cmd == "diff") {
+    try {
+    var compte1 = Object.entries(await owapi.getAccountByName(args[0]))
+      for (let i = 0; i < compte1.length; i++) {
+        if(compte1[i][1].platform == "pc") {
+          compte1 = compte1[i][1]
+        }else{
+          throw ('PLAYER_NOT_EXIST1')
+        }
+      }
+      var compte2 = Object.entries(await owapi.getAccountByName(args[1]))
+      for (let i = 0; i < compte2.length; i++) {
+        if(compte2[i][1].platform == "pc") {
+          compte2 = compte2[i][1]
+        }else{
+          throw ('PLAYER_NOT_EXIST2')
+        }
+      }
+
+      let account1 = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
+      let account2 = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
+      let hero = null
+
+      if(args[2]) {
+        hero = [`${args[2].toLowerCase()}`]
+      }else{
+        hero = ['all heroes']
+      }
+
+      message.channel.send(new Discord.MessageEmbed()
+      .setTitle(`Qui es le plus fort entre${capitalize(args[0])} et ${capitalize(args[1])}`)
+      .setColor(color))
+
+    } catch (err){
+      console.log(err)
+      if(err == 'PLAYER_NOT_EXIST') {
+        message.reply('Ce compte n\'existe pas!')
+        return;
+      }else if(err == 'ACCOUNT_PRIVATE') {
+        message.reply('La carrière de un de ces compte est privée!')
+        return;
+      }else if(err == 'PLAYER_NOT_EXIST1') {
+        message.reply('Le premier compte n\'existe pas!')
+        return;
+      }else if(err == 'PLAYER_NOT_EXIST2') {
+        message.reply('Le deuxième compte n\'existe pas!')
         return;
       }
     }
