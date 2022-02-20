@@ -5,7 +5,6 @@ const Discord = require('discord.js');
 const Profil = require('./src/profil');
 const bot = new Discord.Client();
 var fs = require('fs');
-const { type } = require('os');
 require("dotenv").config()
 
 let channel = /*"944064019155804180"*/ "828518673244618752"
@@ -52,8 +51,7 @@ var updateProfil = async function() {
         listeProfile[i].dpsSr = listeSrDps
         listeProfile[i].supportSr = listeSrSupport
         fs.writeFile('./src/data.json', JSON.stringify(listeProfile), 'utf8', function(err) {
-          if (err) throw err;
-        })  
+          if (err) throw err;})
         messageUpdate(listeProfile[i])
       }else{
         console.log("Rien")
@@ -131,7 +129,6 @@ var messageUpdate = function(profil) {
     try {
       bot.channels.cache.get(channel).send(new Discord.MessageEmbed()
       .setTitle(`${profil.nickName} vient de finir une session! Voici un résumé:`)
-      .setThumbnail(profil.thumbnail)
       .addFields(
         {name: `Tank`, value: `${(profil.tankSr[9] - profil.tankSr[8]) < 0 ? '🔴': (profil.tankSr[9] - profil.tankSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.tankSr[9] - profil.tankSr[8]}`, inline: true},
         {name: `Dps`, value: `${(profil.dpsSr[9] - profil.dpsSr[8]) < 0 ? '🔴': (profil.dpsSr[9] - profil.dpsSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.dpsSr[9] - profil.dpsSr[8]}`, inline: true},
@@ -183,7 +180,7 @@ setInterval(
     } catch (error) {
       console.log(error)
     }
-  }, /*1800000*/30000);
+  }, /*300000*/300000);
 
 
 bot.on("message", async (message) => {
@@ -196,23 +193,23 @@ bot.on("message", async (message) => {
 
   if(cmd == "addprofile") {
     try {
-      var compte1 = Object.entries(await owapi.getAccountByName(args[0]))
-      for (let i = 0; i < compte1.length; i++) {
-        if(compte1[i][1].platform == "pc") {
-          compte1 = compte1[i][1]
+      var compte = Object.entries(await owapi.getAccountByName(args[0]))
+      for (let i = 0; i < compte.length; i++) {
+        if(compte[i][1].platform == "pc") {
+          compte = compte[i][1]
         }else{
           throw ('PLAYER_NOT_EXIST')
         }
       }
-      let owCompte = await ow.getBasicInfo(compte1.urlName, "pc")
-      compte1 = await owapi.getGeneralStats(compte1.urlName, "pc")
-      let mostplayed = Object.entries((await ow.getMostPlayed(compte1.urlName, "pc")).competitive)
-      nomCompte = compte1.name
-      console.log(compte1)
+      let owCompte = await ow.getBasicInfo(compte.urlName, "pc")
+      compte1 = await owapi.getGeneralStats(compte.urlName, "pc")
+      let mostplayed = Object.entries((await ow.getMostPlayed(compte.urlName, "pc")).competitive)
+      nomCompte = compte.name
+      console.log(compte)
 
       let messageConf = (new Discord.MessageEmbed()
       .setImage(mostplayed[0][1].img)
-      .setTitle(`**${compte1.name}** profile`)
+      .setTitle(`**${compte.name}** profile`)
       .addFields(
         ((await owCompte).rank.tank) ? {name: `🛡️`, value: (await owCompte).rank.tank.sr, inline: true} : {name: `🛡️`, value: "---", inline: true},
         ((await owCompte).rank.damage) ? {name: `⚔️`, value: (await owCompte).rank.damage.sr, inline: true} : {name: `⚔️`, value: "---", inline: true},
@@ -337,35 +334,34 @@ bot.on("message", async (message) => {
 
   else if(cmd == "herostats") {
     try {
-      var compte1 = Object.entries(await owapi.getAccountByName(args[0]))
-      for (let i = 0; i < compte1.length; i++) {
-        if(compte1[i][1].platform == "pc") {
-          compte1 = compte1[i][1]
+      var compte = Object.entries(await owapi.getAccountByName(args[0]))
+      for (let i = 0; i < compte.length; i++) {
+        if(compte[i][1].platform == "pc") {
+          compte = compte[i][1]
         }else{
           throw ('PLAYER_NOT_EXIST')
         }
       }
 
-      let account = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
-      if(!account.hero_list.includes(args[1].toLowerCase())) return message.reply(`Héro inconnu ou aucune données disponibles`)
-
+      let account = await owapi.getModeStats(compte.urlName, "competitive", "pc")
+      if(!account.hero_list.includes(args[1].toLowerCase().replace(":", ": "))) return message.reply(`Héro inconnu ou aucune données disponibles`)
       let messageHeroStats = new Discord.MessageEmbed()
-      .setTitle(`Stats de ${compte1.name.split("#")[0]} avec ${capitalize(args[1].toUpperCase())}`)
+      .setTitle(`Stats de ${compte.name.split("#")[0]} avec ${capitalize(args[1].toUpperCase())}`)
       .setColor(color)
-      .setImage((await ow.getAllStats(compte1.urlName, "pc")).mostPlayed.competitive[`${args[1].toLowerCase()}`].img)
-      .setThumbnail((await owapi.getGeneralStats(compte1.urlName, "pc")).profile)
+      .setImage((await ow.getAllStats(compte.urlName, "pc")).mostPlayed.competitive[`${args[1].toLowerCase().replace(":", "")}`].img)
+      .setThumbnail((await owapi.getGeneralStats(compte.urlName, "pc")).profile)
       .addFields(
-        {name: "Temps de jeu", value: `${account.career_stats[args[1].toLowerCase()]['Game']['TimePlayed']}`, inline: false},
-        {name: "WinRate", value: `${isNaN(((account.career_stats[args[1].toLowerCase()]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']) * 100).toFixed(2)) ? 0 : ((account.career_stats[args[1].toLowerCase()]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']) * 100).toFixed(2)} %`, inline: false},
-        {name: "Kills", value: `${account.career_stats[args[1].toLowerCase()]['Combat']['Eliminations'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase()]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase()]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "Morts", value: `${account.career_stats[args[1].toLowerCase()]['Combat']['Deaths'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase()]['Combat']['Deaths'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase()]['Combat']['Deaths'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "Ratio", value: `${(account.career_stats[args[1].toLowerCase()]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase()]['Combat']['Deaths']).toFixed(2)}`, inline: true},
-        {name: "🥇", value: `${account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsGold'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsGold'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsGold'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "🥈", value: `${account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsSilver'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsSilver'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsSilver'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "🥉", value: `${account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsBronze'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsBronze'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase()]['Match Awards']['MedalsBronze'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "Dmg fait par partie", value: `${(account.career_stats[args[1].toLowerCase()]['Combat']['AllDamageDone'] / account.career_stats[args[1].toLowerCase()]['Game']['GamesPlayed']).toFixed(2)}`,inline: true},
-        {name: "Best dégat en une partie", value: `${account.career_stats[args[1].toLowerCase()]['Best']['AllDamageDoneMostinGame']}`,inline: true},
-        {name: `Moyenee "on fire"`, value: `${account.career_stats[args[1].toLowerCase()]['Average']['TimeSpentonFireAvgper10Min']} min`,inline: false},
+        {name: "Temps de jeu", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['TimePlayed']}`, inline: false},
+        {name: "WinRate", value: `${isNaN(((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']) * 100).toFixed(2)) ? 0 : ((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']) * 100).toFixed(2)} %`, inline: false},
+        {name: "Kills", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
+        {name: "Morts", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
+        {name: "Ratio", value: `${(account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths']).toFixed(2)}`, inline: true},
+        {name: "🥇", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsGold'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsGold'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsGold'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
+        {name: "🥈", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsSilver'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsSilver'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsSilver'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
+        {name: "🥉", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsBronze'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsBronze'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsBronze'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
+        {name: "Dmg fait par partie", value: `${(account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['AllDamageDone'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)}`,inline: true},
+        {name: "Best dégat en une partie", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Best']['AllDamageDoneMostinGame']}`,inline: true},
+        {name: `Moyenee "on fire"`, value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['TimeSpentonFireAvgper10Min']} min`,inline: false},
       )
       message.channel.send(messageHeroStats)
     } catch (err) {
@@ -400,7 +396,7 @@ bot.on("message", async (message) => {
       }
 
       let account1 = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
-      let account2 = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
+      let account2 = await owapi.getModeStats(compte2.urlName, "competitive", "pc")
       let hero = null
 
       if(args[2]) {
@@ -408,11 +404,252 @@ bot.on("message", async (message) => {
       }else{
         hero = ['all heroes']
       }
+      if(args[2]) {
+        if(!account1.hero_list.includes(hero[0])) return message.reply(`Pas de données disponibles pour ${capitalize(hero[0])} avec ${args[0]}`)
+        if(!account2.hero_list.includes(hero[0])) return message.reply(`Pas de données disponibles pour ${capitalize(hero[0])} avec ${args[1]}`)
+      }
 
-      message.channel.send(new Discord.MessageEmbed()
-      .setTitle(`Qui es le plus fort entre${capitalize(args[0])} et ${capitalize(args[1])}`)
-      .setColor(color))
+      let nom1 = capitalize(args[0])
+      let nom2 = capitalize(args[1])
+      let winrate1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseInt(((account1.career_stats[hero]['Game']['GamesWon'] / account1.career_stats[hero]['Game']['GamesPlayed']) * 100).toFixed(0))
+      let winrate2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseInt(((account2.career_stats[hero]['Game']['GamesWon'] / account2.career_stats[hero]['Game']['GamesPlayed']) * 100).toFixed(0))
+      let win1 = parseInt(account1.career_stats[hero]['Game']['GamesWon'])
+      let win2 = parseInt(account2.career_stats[hero]['Game']['GamesWon'])
+      let lose1 = parseInt(account1.career_stats[hero]['Game']['GamesLost'])
+      let lose2 = parseInt(account2.career_stats[hero]['Game']['GamesLost'])
 
+      let messageDiff = null
+      let diff = new Discord.MessageEmbed()
+      .setTitle(`Qui est le plus fort entre ${capitalize(args[0])} et ${capitalize(args[1])} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'General', value: '**stats**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Win Rate**", value: `${winrate1} % ${winrate1 > winrate2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Win Rate**", value: `${winrate2} % ${winrate1 > winrate2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Win**", value: `${win1} ${win1 > win2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Win**", value: `${win2} ${win1 > win2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Lose**", value: `${lose1} ${lose1 < lose2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Lose**", value: `${lose2} ${lose1 < lose2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true}
+      )
+      message.channel.send(diff).then(sent =>{
+        messageDiff = sent
+        sent.react("➡️")
+      })
+      let ratio1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : (account1.career_stats[hero]['Combat']['Eliminations'] / account1.career_stats[hero]['Combat']['Deaths']).toFixed(2)
+      let ratio2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : (account2.career_stats[hero]['Combat']['Eliminations'] / account2.career_stats[hero]['Combat']['Deaths']).toFixed(2)
+      let killGame1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : (account1.career_stats[hero]['Combat']['Eliminations'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2)
+      let killGame2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : (account2.career_stats[hero]['Combat']['Eliminations'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2)
+      let objKill1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : (account1.career_stats[hero]['Combat']['ObjectiveKills'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2)
+      let objKill2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : (account2.career_stats[hero]['Combat']['ObjectiveKills'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2)
+      let objTimeTotal1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : account1.career_stats[hero]['Combat']['ObjectiveTime']
+      let objTimeTotal2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : account2.career_stats[hero]['Combat']['ObjectiveTime']
+      let objTimeGame1 = objTimeTotal1 == 0 ? 0 : objTimeTotal1.split(':').length >= 3 ? new Date((((+objTimeTotal1.split(':')[0]) * 60 * 60 + (+objTimeTotal1.split(':')[1]) * 60 + (+objTimeTotal1.split(":")[2])) / account1.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19) : new Date((((+objTimeTotal1.split(':')[0]) * 60 + (+objTimeTotal1.split(':')[1])) / account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 1 : account1.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19)
+      let objTimeGame2 = objTimeTotal2 == 0 ? 0 : objTimeTotal2.split(':').length >= 3 ? new Date((((+objTimeTotal2.split(':')[0]) * 60 * 60 + (+objTimeTotal2.split(':')[1]) * 60 + (+objTimeTotal2.split(":")[2])) / account2.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19) : new Date((((+objTimeTotal2.split(':')[0]) * 60 + (+objTimeTotal2.split(':')[1])) / account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 1 : account2.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19)
+      let dmgDone1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseInt(account1.career_stats[hero]['Combat']['AllDamageDone'] / account1.career_stats[hero]['Game']['GamesPlayed'])
+      let dmgDone2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 :parseInt(account2.career_stats[hero]['Combat']['AllDamageDone'] / account2.career_stats[hero]['Game']['GamesPlayed'])
+      let healDone1 = account1.career_stats[hero]['Assists'] == undefined ? 0 : account1.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseInt(account1.career_stats[hero]['Assists']['HealingDone'] / account1.career_stats[hero]['Game']['GamesPlayed'])
+      let healDone2 = account2.career_stats[hero]['Assists'] == undefined ? 0 : account2.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseInt(account2.career_stats[hero]['Assists']['HealingDone'] / account2.career_stats[hero]['Game']['GamesPlayed'])
+      let diff2 = new Discord.MessageEmbed()
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'En moyenne', value: '**par partie**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Ratio**", value: `${ratio1} ${ratio1 > ratio2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Ratio**", value: `${ratio2} ${ratio1 > ratio2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Kill**", value: `${killGame1} ${killGame1 > killGame2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Kill**", value: `${killGame2} ${killGame1 > killGame2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Objective kills**", value: `${objKill1} ${objKill1 > objKill2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Objective kills**", value: `${objKill2} ${objKill1 > objKill2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Objective Time**", value: `${objTimeGame1} ${objTimeGame1 > objTimeGame2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Objective Time**", value: `${objTimeGame2} ${objTimeGame1 > objTimeGame2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Dommage fait**", value: `${dmgDone1} ${dmgDone1 > dmgDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Dommage fait**", value: `${dmgDone2} ${dmgDone1 > dmgDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Healing fait**", value: `${healDone1} ${healDone1 > healDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Healing fait**", value: `${healDone2} ${healDone1 > healDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+      )
+      
+      let deathsGame1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Combat']['Deaths'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let deathsGame2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Combat']['Deaths'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let soloKills1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account1.career_stats[hero]['Combat']['SoloKills'] == undefined ? 0 : parseFloat((account1.career_stats[hero]['Combat']['SoloKills'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let soloKills2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account2.career_stats[hero]['Combat']['SoloKills'] == undefined ? 0 : parseFloat((account2.career_stats[hero]['Combat']['SoloKills'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let filnalBlow1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Combat']['FinalBlows'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let filnalBlow2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Combat']['FinalBlows'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let timeFireTotal1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : account1.career_stats[hero]['Combat']['TimeSpentonFire']
+      let timeFireTotal2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : account2.career_stats[hero]['Combat']['TimeSpentonFire']
+      let timeFireGame1 = timeFireTotal1 == 0 ? 0 : timeFireTotal1.split(':').length >= 3 ? new Date((((+timeFireTotal1.split(':')[0]) * 60 * 60 + (+timeFireTotal1.split(':')[1]) * 60 + (+timeFireTotal1.split(":")[2])) / account1.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19) : new Date((((+timeFireTotal1.split(':')[0]) * 60 + (+timeFireTotal1.split(':')[1])) / account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 1 : account1.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19)
+      let timeFireGame2 = timeFireTotal1 == 0 ? 0 : timeFireTotal2.split(':').length >= 3 ? new Date((((+timeFireTotal2.split(':')[0]) * 60 * 60 + (+timeFireTotal2.split(':')[1]) * 60 + (+timeFireTotal2.split(":")[2])) / account1.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19) : new Date((((+timeFireTotal2.split(':')[0]) * 60 + (+timeFireTotal2.split(':')[1])) / account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 1 : account1.career_stats[hero]['Game']['GamesPlayed']) * 1000).toISOString().slice(14,19)
+      let cards1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards'] == undefined ? 0: parseFloat((account1.career_stats[hero]['Match Awards']['Cards'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let cards2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['Cards'] == undefined ? 0: parseFloat((account2.career_stats[hero]['Match Awards']['Cards'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      
+      let diff3 = new Discord.MessageEmbed()
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'En moyenne', value: '**par partie**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Morts**", value: `${deathsGame1} ${deathsGame1 < deathsGame2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Morts**", value: `${deathsGame2} ${deathsGame1 < deathsGame2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Solo Kills**", value: `${soloKills1} ${soloKills1 > soloKills2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Solo Kills**", value: `${soloKills2} ${soloKills1 > soloKills2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Final Blows**", value: `${filnalBlow1} ${filnalBlow1 > filnalBlow2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Final Blows**", value: `${filnalBlow2} ${filnalBlow1 > filnalBlow2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Time On Fire**", value: `${timeFireGame1} ${timeFireGame1 > timeFireGame2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Time On Fire**", value: `${timeFireGame2} ${timeFireGame1 > timeFireGame2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Cards**", value: `${cards1} ${cards1 > cards2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Cards**", value: `${cards2} ${cards1 > cards2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+      )
+
+      let medals1 = account1.career_stats[hero]['Match Awards']['Medals'] == undefined || account1.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['Medals'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let medals2 = account2.career_stats[hero]['Match Awards']['Medals'] == undefined || account2.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['Medals'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let gold1 = account1.career_stats[hero]['Match Awards']['MedalsGold'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsGold'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['MedalsGold'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let gold2 = account2.career_stats[hero]['Match Awards']['MedalsGold'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsGold'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['MedalsGold'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let silver1 = account1.career_stats[hero]['Match Awards']['MedalsSilver'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsSilver'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['MedalsSilver'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let silver2 = account2.career_stats[hero]['Match Awards']['MedalsSilver'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsSilver'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['MedalsSilver'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let bronze1 = account1.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['MedalsBronze'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let bronze2 = account2.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['MedalsBronze'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
+      let diff4 = new Discord.MessageEmbed()
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'En moyenne', value: '**par partie**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Medals**", value: `${medals1} ${medals1 > medals2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Medals**", value: `${medals2} ${medals1 > medals2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**🥇**", value: `${gold1} ${gold1 > gold2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**🥇**", value: `${gold2} ${gold1 > gold2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**🥈**", value: `${silver1} ${silver1 > silver2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**🥈**", value: `${silver2} ${silver1 > silver2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**🥉**", value: `${bronze1} ${bronze1 > bronze2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**🥉**", value: `${bronze2} ${bronze1 > bronze2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true}
+      )
+
+      let topKillGame1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['EliminationsMostinGame'] == 0 ? 0 : account1.career_stats[hero]['Best']['EliminationsMostinGame']
+      let topKillGame2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['EliminationsMostinGame'] == 0 ? 0 : account2.career_stats[hero]['Best']['EliminationsMostinGame']
+      let topFinalBlow1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['FinalBlowsMostinGame'] == 0 ? 0 : account1.career_stats[hero]['Best']['FinalBlowsMostinGame']
+      let topFinalBlow2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['FinalBlowsMostinGame'] == 0 ? 0 : account2.career_stats[hero]['Best']['FinalBlowsMostinGame']
+      let topDmgDone1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['AllDamageDoneMostinGame'] == 0 ? 0 : account1.career_stats[hero]['Best']['AllDamageDoneMostinGame']
+      let topDmgDone2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['AllDamageDoneMostinGame'] == 0 ? 0 : account2.career_stats[hero]['Best']['AllDamageDoneMostinGame']
+      let topHealingDone1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['HealingDoneMostinGame'] == 0 || account1.career_stats[hero]['Best']['HealingDoneMostinGame'] == undefined ? 0 : account1.career_stats[hero]['Best']['HealingDoneMostinGame']
+      let topHealingDone2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['HealingDoneMostinGame'] == 0 || account2.career_stats[hero]['Best']['HealingDoneMostinGame'] == undefined ? 0 : account2.career_stats[hero]['Best']['HealingDoneMostinGame']
+
+      let diff5 = new Discord.MessageEmbed()
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'Best en', value: '**une partie**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Kills**", value: `${topKillGame1} ${topKillGame1 > topKillGame2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Kills**", value: `${topKillGame2} ${topKillGame1 > topKillGame2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Final Blows**", value: `${topFinalBlow1} ${topFinalBlow1 > topFinalBlow2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Final Blows**", value: `${topFinalBlow2} ${topFinalBlow1 > topFinalBlow2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Dommage fait**", value: `${topDmgDone1} ${topDmgDone1 > topDmgDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Dommage fait**", value: `${topDmgDone2} ${topDmgDone1 > topDmgDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Healing fait**", value: `${topHealingDone1} ${topHealingDone1 > topHealingDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Healing fait**", value: `${topHealingDone2} ${topHealingDone1 > topHealingDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true}
+      )
+
+      let timePlayed1 = account1.career_stats[hero]['Game']['TimePlayed']
+      let timePlayed2 = account2.career_stats[hero]['Game']['TimePlayed']
+      let allKill1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Combat']['Eliminations'])
+      let allKill2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account2.career_stats[hero]['Combat']['Eliminations'])
+      let allobjKill1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Combat']['ObjectiveKills'])
+      let allobjKill2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account2.career_stats[hero]['Combat']['ObjectiveKills'])
+      let allobjTime1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : account1.career_stats[hero]['Combat']['ObjectiveTime']
+      let allobjTime2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : account2.career_stats[hero]['Combat']['ObjectiveTime']
+      let allDmgDone1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Combat']['AllDamageDone'])
+      let allDmgDone2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account2.career_stats[hero]['Combat']['AllDamageDone'])
+      let allHealingDone1 = account1.career_stats[hero]['Assists'] == undefined || account1.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Assists']['HealingDone'])
+      let allhealingDone2 = account2.career_stats[hero]['Assists'] == undefined || account2.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseFloat(account2.career_stats[hero]['Assists']['HealingDone'])
+
+      let diff6 = new Discord.MessageEmbed()
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'Total', value: '**LifeTime**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Temps de jeu**", value: `${timePlayed1} ${timePlayed1 > timePlayed2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Temps de jeu**", value: `${timePlayed2} ${timePlayed1 > timePlayed2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Kills**", value: `${allKill1} ${allKill1 > allKill2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Kills**", value: `${allKill2} ${allKill1 > allKill2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Objective Kills**", value: `${allobjKill1} ${allobjKill1 > allobjKill2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Objective Kills**", value: `${allobjKill2} ${allobjKill1 > allobjKill2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Objective Time**", value: `${allobjTime1} ${allobjTime1 > allobjTime2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Objective Time**", value: `${allobjTime2} ${allobjTime1 > allobjTime2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Dommage Fait**", value: `${allDmgDone1} ${allDmgDone1 > allDmgDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Dommage Fait**", value: `${allDmgDone2} ${allDmgDone1 > allDmgDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Healing Done**", value: `${allHealingDone1} ${allHealingDone1 > allhealingDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Healing Done**", value: `${allhealingDone2} ${allHealingDone1 > allhealingDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+      )
+      setTimeout(() => {
+        messageDiff.edit(diff2)
+        setTimeout(() => {
+          messageDiff.edit(diff3)
+          setTimeout(() => {
+            messageDiff.edit(diff4)
+            setTimeout(() => {
+              messageDiff.edit(diff5)
+              setTimeout(() => {
+                messageDiff.edit(diff6)
+              }, 5000);
+            }, 5000);
+          }, 5000);
+        }, 5000);
+      }, 5000);
+      
     } catch (err){
       console.log(err)
       if(err == 'PLAYER_NOT_EXIST') {
@@ -427,8 +664,22 @@ bot.on("message", async (message) => {
       }else if(err == 'PLAYER_NOT_EXIST2') {
         message.reply('Le deuxième compte n\'existe pas!')
         return;
+      }else{
+        message.channel.send("Une erreur est survenue. Veuillez réessayer.")
       }
     }
+  }
+
+  else if(cmd == "help") {
+    message.channel.send(new MessageEmbed()
+    .setTitle("Help")
+    .setColor(color)
+    .addFields(
+      {name: "!addprofile [battletag]", value: `Ajouter votre compte au suivit des stats.`},
+      {name: "!compstats [battletag]", value: `Affiche les stats competitive d'un profil.`},
+      {name: "!herostats [battletag] [hero]", value: `Affiche les stats d'un héro spécifique d'un joueur.`},
+      {name: "!help ", value: `Pour avoir de l'aide à propos des commandes.`},
+    ))
   }
 
   else if(cmd == "help") {
