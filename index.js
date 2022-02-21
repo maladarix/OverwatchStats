@@ -10,8 +10,20 @@ require("dotenv").config()
 let channel = /*"944064019155804180"*/ "828518673244618752"
 let prefix = "!"
 let idMessage = null
+let diffId = null
 let nomCompte = null
 let compte1 = null
+let messageDiff = null
+let page = 0
+let diff = new Discord.MessageEmbed()
+let diff2 = new Discord.MessageEmbed()
+let diff3 = new Discord.MessageEmbed()
+let diff4 = new Discord.MessageEmbed()
+let diff5 = new Discord.MessageEmbed()
+let diff6 = new Discord.MessageEmbed()
+let diff7 = new Discord.MessageEmbed()
+let diff8 = new Discord.MessageEmbed()
+let pages = [diff, diff2, diff3, diff4, diff5, diff6, diff7, diff8]
 let color = "c79304"
 let listeProfile = []
 fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
@@ -33,10 +45,10 @@ bot.on('ready', () => {
 })
 
 var updateProfil = async function() {
-  try {
-    for (let i = 0; i < listeProfile.length; i++ ) {
+  for (let i = 0; i < listeProfile.length; i++ ) {
+    try {
       listeProfile[i].name = listeProfile[i].name.replace(/-/g,"#")
-      var stats = await ow.getAllStats(listeProfile[i].name.replace(/#/g,"-"), 'pc');
+      var stats = await ow.getAllStats(listeProfile[i].name.replace(/#/g,"-"), 'pc')
       if(listeProfile[i].tankSr[9] != (stats.rank.tank? stats.rank.tank.sr : 0) || listeProfile[i].dpsSr[9] != (stats.rank.damage? stats.rank.damage.sr : 0)  || listeProfile[i].supportSr[9] != (stats.rank.support? stats.rank.support.sr : 0)) {
         let listeSrTank = listeProfile[i].tankSr
         let listeSrDps = listeProfile[i].dpsSr
@@ -56,10 +68,9 @@ var updateProfil = async function() {
       }else{
         console.log("Rien")
       }
+    } catch (error) {
+      console.log(error)
     }
-  }
-  catch (error) {
-    console.log(error)
   }
 }
 
@@ -118,7 +129,7 @@ var messageUpdate = function(profil) {
         },
         scales: {
           y: {
-            suggestedMin: 2000,
+            suggestedMin: 1500,
           }
         }
       },
@@ -180,7 +191,7 @@ setInterval(
     } catch (error) {
       console.log(error)
     }
-  }, /*300000*/300000);
+  }, /*600000*/600000);
 
 
 bot.on("message", async (message) => {
@@ -205,7 +216,6 @@ bot.on("message", async (message) => {
       compte1 = await owapi.getGeneralStats(compte.urlName, "pc")
       let mostplayed = Object.entries((await ow.getMostPlayed(compte.urlName, "pc")).competitive)
       nomCompte = compte.name
-      console.log(compte)
 
       let messageConf = (new Discord.MessageEmbed()
       .setImage(mostplayed[0][1].img)
@@ -291,7 +301,7 @@ bot.on("message", async (message) => {
         },
         scales: {
           y: {
-            suggestedMin: 2000,
+            suggestedMin: 1500,
           }
         }
       },
@@ -333,6 +343,8 @@ bot.on("message", async (message) => {
   }
 
   else if(cmd == "herostats") {
+    if(!args[0]) return message.reply("Battle#Tag ?")
+    if(!args[1]) return message.reply("Héro ?")
     try {
       var compte = Object.entries(await owapi.getAccountByName(args[0]))
       for (let i = 0; i < compte.length; i++) {
@@ -342,7 +354,7 @@ bot.on("message", async (message) => {
           throw ('PLAYER_NOT_EXIST')
         }
       }
-
+      
       let account = await owapi.getModeStats(compte.urlName, "competitive", "pc")
       if(!account.hero_list.includes(args[1].toLowerCase().replace(":", ": "))) return message.reply(`Héro inconnu ou aucune données disponibles`)
       let messageHeroStats = new Discord.MessageEmbed()
@@ -377,6 +389,8 @@ bot.on("message", async (message) => {
   }
 
   else if(cmd == "diff") {
+    if(!args[0]) return message.reply("Battle#Tag du premier joueur?")
+    if(!args[1]) return message.reply("Battle#Tag du deuxième joueur? ?")
     try {
     var compte1 = Object.entries(await owapi.getAccountByName(args[0]))
       for (let i = 0; i < compte1.length; i++) {
@@ -418,10 +432,10 @@ bot.on("message", async (message) => {
       let lose1 = parseInt(account1.career_stats[hero]['Game']['GamesLost'])
       let lose2 = parseInt(account2.career_stats[hero]['Game']['GamesLost'])
 
-      let messageDiff = null
-      let diff = new Discord.MessageEmbed()
+      diff
       .setTitle(`Qui est le plus fort entre ${capitalize(args[0])} et ${capitalize(args[1])} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
+      .setFooter(`Page 1 sur ${pages.length}`)
       .addFields(
         {name: "Profil de" , value: `**${nom1}**`, inline: true},
         {name: "Profil de" , value: `**${nom2}**`, inline: true},
@@ -441,8 +455,9 @@ bot.on("message", async (message) => {
       )
       message.channel.send(diff).then(sent =>{
         messageDiff = sent
-        sent.react("➡️")
+        diffId = sent.id
       })
+
       let ratio1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : (account1.career_stats[hero]['Combat']['Eliminations'] / account1.career_stats[hero]['Combat']['Deaths']).toFixed(2)
       let ratio2 = account2.career_stats[hero]['Combat'] == undefined ? 0 : (account2.career_stats[hero]['Combat']['Eliminations'] / account2.career_stats[hero]['Combat']['Deaths']).toFixed(2)
       let killGame1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : (account1.career_stats[hero]['Combat']['Eliminations'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2)
@@ -457,9 +472,11 @@ bot.on("message", async (message) => {
       let dmgDone2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 :parseInt(account2.career_stats[hero]['Combat']['AllDamageDone'] / account2.career_stats[hero]['Game']['GamesPlayed'])
       let healDone1 = account1.career_stats[hero]['Assists'] == undefined ? 0 : account1.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseInt(account1.career_stats[hero]['Assists']['HealingDone'] / account1.career_stats[hero]['Game']['GamesPlayed'])
       let healDone2 = account2.career_stats[hero]['Assists'] == undefined ? 0 : account2.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseInt(account2.career_stats[hero]['Assists']['HealingDone'] / account2.career_stats[hero]['Game']['GamesPlayed'])
-      let diff2 = new Discord.MessageEmbed()
+      
+      diff2
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
+      .setFooter(`Page 2 sur ${pages.length}`)
       .addFields(
         {name: "Profil de" , value: `**${nom1}**`, inline: true},
         {name: "Profil de" , value: `**${nom2}**`, inline: true},
@@ -500,9 +517,10 @@ bot.on("message", async (message) => {
       let cards1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards'] == undefined ? 0: parseFloat((account1.career_stats[hero]['Match Awards']['Cards'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let cards2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['Cards'] == undefined ? 0: parseFloat((account2.career_stats[hero]['Match Awards']['Cards'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       
-      let diff3 = new Discord.MessageEmbed()
+      diff3
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
+      .setFooter(`Page 3 sur ${pages.length}`)
       .addFields(
         {name: "Profil de" , value: `**${nom1}**`, inline: true},
         {name: "Profil de" , value: `**${nom2}**`, inline: true},
@@ -535,9 +553,11 @@ bot.on("message", async (message) => {
       let silver2 = account2.career_stats[hero]['Match Awards']['MedalsSilver'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsSilver'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['MedalsSilver'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let bronze1 = account1.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['MedalsBronze'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let bronze2 = account2.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['MedalsBronze'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
-      let diff4 = new Discord.MessageEmbed()
+      
+      diff4
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
+      .setFooter(`Page 4 sur ${pages.length}`)
       .addFields(
         {name: "Profil de" , value: `**${nom1}**`, inline: true},
         {name: "Profil de" , value: `**${nom2}**`, inline: true},
@@ -568,9 +588,10 @@ bot.on("message", async (message) => {
       let topHealingDone1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['HealingDoneMostinGame'] == 0 || account1.career_stats[hero]['Best']['HealingDoneMostinGame'] == undefined ? 0 : account1.career_stats[hero]['Best']['HealingDoneMostinGame']
       let topHealingDone2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['HealingDoneMostinGame'] == 0 || account2.career_stats[hero]['Best']['HealingDoneMostinGame'] == undefined ? 0 : account2.career_stats[hero]['Best']['HealingDoneMostinGame']
 
-      let diff5 = new Discord.MessageEmbed()
+      diff5
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
+      .setFooter(`Page 5 sur ${pages.length}`)
       .addFields(
         {name: "Profil de" , value: `**${nom1}**`, inline: true},
         {name: "Profil de" , value: `**${nom2}**`, inline: true},
@@ -605,9 +626,10 @@ bot.on("message", async (message) => {
       let allHealingDone1 = account1.career_stats[hero]['Assists'] == undefined || account1.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Assists']['HealingDone'])
       let allhealingDone2 = account2.career_stats[hero]['Assists'] == undefined || account2.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseFloat(account2.career_stats[hero]['Assists']['HealingDone'])
 
-      let diff6 = new Discord.MessageEmbed()
+      diff6
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
+      .setFooter(`Page 6 sur ${pages.length}`)
       .addFields(
         {name: "Profil de" , value: `**${nom1}**`, inline: true},
         {name: "Profil de" , value: `**${nom2}**`, inline: true},
@@ -630,26 +652,93 @@ bot.on("message", async (message) => {
         {name: "**Dommage Fait**", value: `${allDmgDone1} ${allDmgDone1 > allDmgDone2 ? "🟢" : "🔴"}`, inline: true},
         {name: "**Dommage Fait**", value: `${allDmgDone2} ${allDmgDone1 > allDmgDone2 ? "🔴" : "🟢"}`, inline: true},
         {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Healing Done**", value: `${allHealingDone1} ${allHealingDone1 > allhealingDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Healing Done**", value: `${allhealingDone2} ${allHealingDone1 > allhealingDone2 ? "🔴" : "🟢"}`, inline: true},
+        {name: "**Healing fait**", value: `${allHealingDone1} ${allHealingDone1 > allhealingDone2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Healing fait**", value: `${allhealingDone2} ${allHealingDone1 > allhealingDone2 ? "🔴" : "🟢"}`, inline: true},
         {name: '\u200b', value: '\u200b', inline: true},
       )
-      setTimeout(() => {
-        messageDiff.edit(diff2)
-        setTimeout(() => {
-          messageDiff.edit(diff3)
-          setTimeout(() => {
-            messageDiff.edit(diff4)
-            setTimeout(() => {
-              messageDiff.edit(diff5)
-              setTimeout(() => {
-                messageDiff.edit(diff6)
-              }, 5000);
-            }, 5000);
-          }, 5000);
-        }, 5000);
+
+      let totalDeath1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['Deaths'] == 0 || account2.career_stats[hero]['Combat']['Deaths'] == undefined  ? 0 : account1.career_stats[hero]['Combat']['Deaths']
+      let totalDeath2 = account2.career_stats[hero]['Combat'] == undefined || account2.career_stats[hero]['Combat']['Deaths'] == 0 || account2.career_stats[hero]['Combat']['Deaths'] == undefined  ? 0 : account2.career_stats[hero]['Combat']['Deaths']
+      let totalSolo1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['SoloKills'] == 0 || account2.career_stats[hero]['Combat']['SoloKills'] == undefined  ? 0 : account1.career_stats[hero]['Combat']['SoloKills']
+      let totalSolo2 = account2.career_stats[hero]['Combat'] == undefined || account2.career_stats[hero]['Combat']['SoloKills'] == 0 || account2.career_stats[hero]['Combat']['SoloKills'] == undefined  ? 0 : account2.career_stats[hero]['Combat']['SoloKills']
+      let totalFinal1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['FinalBlows'] == 0 || account2.career_stats[hero]['Combat']['FinalBlows'] == undefined ? 0 : account1.career_stats[hero]['Combat']['FinalBlows']
+      let totalFinal2 = account2.career_stats[hero]['Combat'] == undefined || account2.career_stats[hero]['Combat']['FinalBlows'] == 0 || account2.career_stats[hero]['Combat']['FinalBlows'] == undefined ? 0 : account2.career_stats[hero]['Combat']['FinalBlows']
+
+      diff7
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .setFooter(`Page 7 sur ${pages.length}`)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'Total', value: '**LifeTime**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Morts**", value: `${totalDeath1} ${totalDeath1 < totalDeath2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Morts**", value: `${totalDeath2} ${totalDeath1 < totalDeath2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Solo Kills**", value: `${totalSolo1} ${totalSolo1 > totalSolo2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Solo Kills**", value: `${totalSolo2} ${totalSolo1 > totalSolo2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Final Blows**", value: `${totalFinal1} ${totalFinal1 > totalFinal2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**Final Blows**", value: `${totalFinal2} ${totalFinal1 > totalFinal2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+      )
+
+      let totalCard1 = account1.career_stats[hero]['Match Awards']['Cards'] == undefined || account1.career_stats[hero]['Match Awards']['Cards'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards']
+      let totalCard2 = account1.career_stats[hero]['Match Awards']['Cards'] == undefined || account1.career_stats[hero]['Match Awards']['Cards'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards']
+      let totalMedals1 = account1.career_stats[hero]['Match Awards']['Medals'] == undefined || account1.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Medals']
+      let totalMedals2 = account2.career_stats[hero]['Match Awards']['Medals'] == undefined || account2.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['Medals']
+      let totalGold1 = account1.career_stats[hero]['Match Awards']['MedalsGold'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsGold'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['MedalsGold']
+      let totalGold2 = account2.career_stats[hero]['Match Awards']['MedalsGold'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsGold'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['MedalsGold']
+      let totalSilver1 = account1.career_stats[hero]['Match Awards']['MedalsSilver'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsSilver'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['MedalsSilver']
+      let totalSilver2 = account2.career_stats[hero]['Match Awards']['MedalsSilver'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsSilver'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['MedalsSilver']
+      let totalBronze1 = account1.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['MedalsBronze']
+      let totalBronze2 = account2.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['MedalsBronze']
+
+      diff8
+      .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
+      .setColor(color)
+      .setFooter(`Page 8 sur ${pages.length}`)
+      .addFields(
+        {name: "Profil de" , value: `**${nom1}**`, inline: true},
+        {name: "Profil de" , value: `**${nom2}**`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: 'Total', value: '**LifeTime**',inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Cards**", value: `${totalCard1} ${totalCard1 > totalCard2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Cards**", value: `${totalCard2} ${totalCard1 > totalCard2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**Medals**", value: `${totalMedals1} ${totalMedals1 > totalMedals2 ? "🟢" : "🔴"}`,inline:true},
+        {name: "**Medals**", value: `${totalMedals2} ${totalMedals1 > totalMedals2 ? "🔴" : "🟢"}`,inline:true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**🥇**", value: `${totalGold1} ${totalGold1 > totalGold2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**🥇**", value: `${totalGold2} ${totalGold1 > totalGold2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**🥈**", value: `${totalSilver1} ${totalSilver1 > totalSilver2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**🥈**", value: `${totalSilver2} ${totalSilver1 > totalSilver2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true},
+        {name: "**🥉**", value: `${totalBronze1} ${totalBronze1 > totalBronze2 ? "🟢" : "🔴"}`, inline: true},
+        {name: "**🥉**", value: `${totalBronze2} ${totalBronze1 > totalBronze2 ? "🔴" : "🟢"}`, inline: true},
+        {name: '\u200b', value: '\u200b', inline: true}
+      )
+
+      let i = 0
+      var loopDiff = setInterval(function(){
+        i ++
+
+        if(i == pages.length - 1) {
+          messageDiff.reactions.removeAll()
+          messageDiff.react("⬅️")
+        }
+       
+        messageDiff.edit(pages[i])
+        page = i + 1
+        if(i == pages.length - 1) return clearInterval(loopDiff)
       }, 5000);
-      
+
     } catch (err){
       console.log(err)
       if(err == 'PLAYER_NOT_EXIST') {
@@ -671,25 +760,14 @@ bot.on("message", async (message) => {
   }
 
   else if(cmd == "help") {
-    message.channel.send(new MessageEmbed()
-    .setTitle("Help")
-    .setColor(color)
-    .addFields(
-      {name: "!addprofile [battletag]", value: `Ajouter votre compte au suivit des stats.`},
-      {name: "!compstats [battletag]", value: `Affiche les stats competitive d'un profil.`},
-      {name: "!herostats [battletag] [hero]", value: `Affiche les stats d'un héro spécifique d'un joueur.`},
-      {name: "!help ", value: `Pour avoir de l'aide à propos des commandes.`},
-    ))
-  }
-
-  else if(cmd == "help") {
     message.channel.send(new Discord.MessageEmbed()
     .setTitle("Help")
     .setColor(color)
     .addFields(
       {name: "!addprofile [battletag]", value: `Ajouter votre compte au suivit des stats.`},
       {name: "!compstats [battletag]", value: `Affiche les stats competitive d'un profil.`},
-      {name: "!herostats [battletag] [hero]", value: `Affiche les stats d'un héro spécifique d'un joueur.`},
+      {name: "!herostats [battletag] [Héro]", value: `Affiche les stats d'un héro spécifique d'un joueur.`},
+      {name: "!diff [battletag] [battletag] (Héro) ", value: `Affiche une comparaison entre 2 joueurs.`},
       {name: "!help ", value: `Pour avoir de l'aide à propos des commandes.`},
     ))
   }
@@ -698,7 +776,7 @@ bot.on("message", async (message) => {
 bot.on('messageReactionAdd', async (reaction, user) => {
   if(user.bot) return
 
-  if(reaction.message.id = idMessage) {
+  if(reaction.message.id == idMessage) {
     let nomStats = nomCompte.replace(/#/g,"-")
     if(!listeProfile.some(profil => profil.name == nomStats)) {
       var stats = await ow.getAllStats(nomStats, 'pc');
@@ -708,6 +786,45 @@ bot.on('messageReactionAdd', async (reaction, user) => {
       reaction.message.channel.send(`Le profil de **${nomCompte}** a été ajouté avec succès!`)
     }else{
      reaction.message.channel.send(`<@${user.id}>, Le compte de **${nomCompte}** existe déja dans la base de donnée`)
+    }
+  }else if(reaction.message.id == diffId) {
+    if(reaction.emoji.name == "➡️") {
+      await reaction.users.remove(user.id)
+      page ++
+      if(page > pages.length) return page --
+
+      if(page != 0) {
+        messageDiff.react("⬅️")
+      }
+
+      if(page == 2) {
+        messageDiff.reactions.removeAll()
+        messageDiff.react("⬅️")
+        messageDiff.react("➡️")
+      }
+
+      messageDiff.edit(pages[page - 1])
+
+      if(page == pages.length) {
+        messageDiff.reactions.removeAll()
+        messageDiff.react("⬅️")
+      }
+    }else if(reaction.emoji.name == "⬅️") {
+      await reaction.users.remove(user.id)
+      page --
+      console.log(page)
+      if(page == 0) return page ++
+
+      if(page != pages.length) {
+        messageDiff.react("➡️")
+      }
+
+      messageDiff.edit(pages[page - 1])
+
+      if(page == 1) {
+        messageDiff.reactions.removeAll()
+        messageDiff.react("➡️")
+      }
     }
   }
 })
