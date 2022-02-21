@@ -436,23 +436,22 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${capitalize(args[0])} et ${capitalize(args[1])} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 1 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'General', value: '**stats**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Win Rate**", value: `${winrate1} % ${winrate1 > winrate2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Win Rate**", value: `${winrate2} % ${winrate1 > winrate2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Win**", value: `${win1} ${win1 > win2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Win**", value: `${win2} ${win1 > win2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Lose**", value: `${lose1} ${lose1 < lose2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Lose**", value: `${lose2} ${lose1 < lose2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true}
-      )
+      .addField("Profil de" , `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('General', '**stats**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Win Rate**", `${winrate1} % ${winrate1 > winrate2 ? "🟢" : "🔴"}`, true)
+      .addField("**Win Rate**", `${winrate2} % ${winrate1 > winrate2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Win**", `${win1} ${win1 > win2 ? "🟢" : "🔴"}`, true)
+      .addField("**Win**", `${win2} ${win1 > win2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Lose**", `${lose1} ${lose1 < lose2 ? "🟢" : "🔴"}`, true)
+      .addField("**Lose**", `${lose2} ${lose1 < lose2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+
       message.channel.send(diff).then(sent =>{
         messageDiff = sent
         diffId = sent.id
@@ -477,32 +476,30 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 2 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'En moyenne', value: '**par partie**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Ratio**", value: `${ratio1} ${ratio1 > ratio2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Ratio**", value: `${ratio2} ${ratio1 > ratio2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Kill**", value: `${killGame1} ${killGame1 > killGame2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Kill**", value: `${killGame2} ${killGame1 > killGame2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Objective kills**", value: `${objKill1} ${objKill1 > objKill2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Objective kills**", value: `${objKill2} ${objKill1 > objKill2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Objective Time**", value: `${objTimeGame1} ${objTimeGame1 > objTimeGame2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Objective Time**", value: `${objTimeGame2} ${objTimeGame1 > objTimeGame2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Dommage fait**", value: `${dmgDone1} ${dmgDone1 > dmgDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Dommage fait**", value: `${dmgDone2} ${dmgDone1 > dmgDone2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Healing fait**", value: `${healDone1} ${healDone1 > healDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Healing fait**", value: `${healDone2} ${healDone1 > healDone2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-      )
+      .addField("Profil de", `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('En moyenne', '**par partie**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Ratio**", `${ratio1} ${ratio1 > ratio2 ? "🟢" : "🔴"}`, true)
+      .addField("**Ratio**", `${ratio2} ${ratio1 > ratio2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Kill**", `${killGame1} ${killGame1 > killGame2 ? "🟢" : "🔴"}`, true)
+      .addField("**Kill**", `${killGame2} ${killGame1 > killGame2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Objective kills**", `${objKill1} ${objKill1 > objKill2 ? "🟢" : "🔴"}`, true)
+      .addField("**Objective kills**", `${objKill2} ${objKill1 > objKill2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Objective Time**", `${objTimeGame1} ${objTimeGame1 > objTimeGame2 ? "🟢" : "🔴"}`, true)
+      .addField("**Objective Time**", `${objTimeGame2} ${objTimeGame1 > objTimeGame2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Dommage fait**", `${dmgDone1} ${dmgDone1 > dmgDone2 ? "🟢" : "🔴"}`, true)
+      .addField("**Dommage fait**", `${dmgDone2} ${dmgDone1 > dmgDone2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Healing fait**", `${healDone1} ${healDone1 > healDone2 ? "🟢" : "🔴"}`, true)
+      .addField("**Healing fait**", `${healDone2} ${healDone1 > healDone2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
       
       let deathsGame1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Combat']['Deaths'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let deathsGame2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Combat']['Deaths'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
@@ -521,29 +518,27 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 3 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'En moyenne', value: '**par partie**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Morts**", value: `${deathsGame1} ${deathsGame1 < deathsGame2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Morts**", value: `${deathsGame2} ${deathsGame1 < deathsGame2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Solo Kills**", value: `${soloKills1} ${soloKills1 > soloKills2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Solo Kills**", value: `${soloKills2} ${soloKills1 > soloKills2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Final Blows**", value: `${filnalBlow1} ${filnalBlow1 > filnalBlow2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Final Blows**", value: `${filnalBlow2} ${filnalBlow1 > filnalBlow2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Time On Fire**", value: `${timeFireGame1} ${timeFireGame1 > timeFireGame2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Time On Fire**", value: `${timeFireGame2} ${timeFireGame1 > timeFireGame2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Cards**", value: `${cards1} ${cards1 > cards2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Cards**", value: `${cards2} ${cards1 > cards2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-      )
+      .addField("Profil de", `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('En moyenne', '**par partie**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Morts**", `${deathsGame1} ${deathsGame1 < deathsGame2 ? "🟢" : "🔴"}`, true)
+      .addField("**Morts**", `${deathsGame2} ${deathsGame1 < deathsGame2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Solo Kills**", `${soloKills1} ${soloKills1 > soloKills2 ? "🟢" : "🔴"}`, true)
+      .addField("**Solo Kills**", `${soloKills2} ${soloKills1 > soloKills2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Final Blows**", `${filnalBlow1} ${filnalBlow1 > filnalBlow2 ? "🟢" : "🔴"}`, true)
+      .addField("**Final Blows**", `${filnalBlow2} ${filnalBlow1 > filnalBlow2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Time On Fire**", `${timeFireGame1} ${timeFireGame1 > timeFireGame2 ? "🟢" : "🔴"}`, true)
+      .addField("**Time On Fire**", `${timeFireGame2} ${timeFireGame1 > timeFireGame2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Cards**", `${cards1} ${cards1 > cards2 ? "🟢" : "🔴"}`, true)
+      .addField("**Cards**", `${cards2} ${cards1 > cards2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
 
       let medals1 = account1.career_stats[hero]['Match Awards']['Medals'] == undefined || account1.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['Medals'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let medals2 = account2.career_stats[hero]['Match Awards']['Medals'] == undefined || account2.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['Medals'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
@@ -558,26 +553,24 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 4 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'En moyenne', value: '**par partie**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Medals**", value: `${medals1} ${medals1 > medals2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Medals**", value: `${medals2} ${medals1 > medals2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**🥇**", value: `${gold1} ${gold1 > gold2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**🥇**", value: `${gold2} ${gold1 > gold2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**🥈**", value: `${silver1} ${silver1 > silver2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**🥈**", value: `${silver2} ${silver1 > silver2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**🥉**", value: `${bronze1} ${bronze1 > bronze2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**🥉**", value: `${bronze2} ${bronze1 > bronze2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true}
-      )
+      .addField("Profil de" , `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('En moyenne', '**par partie**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Medals**", `${medals1} ${medals1 > medals2 ? "🟢" : "🔴"}`, true)
+      .addField("**Medals**", `${medals2} ${medals1 > medals2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**🥇**", `${gold1} ${gold1 > gold2 ? "🟢" : "🔴"}`, true)
+      .addField("**🥇**", `${gold2} ${gold1 > gold2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**🥈**", `${silver1} ${silver1 > silver2 ? "🟢" : "🔴"}`, true)
+      .addField("**🥈**", `${silver2} ${silver1 > silver2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**🥉**", `${bronze1} ${bronze1 > bronze2 ? "🟢" : "🔴"}`, true)
+      .addField("**🥉**", `${bronze2} ${bronze1 > bronze2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
 
       let topKillGame1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['EliminationsMostinGame'] == 0 ? 0 : account1.career_stats[hero]['Best']['EliminationsMostinGame']
       let topKillGame2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['EliminationsMostinGame'] == 0 ? 0 : account2.career_stats[hero]['Best']['EliminationsMostinGame']
@@ -592,26 +585,24 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 5 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'Best en', value: '**une partie**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Kills**", value: `${topKillGame1} ${topKillGame1 > topKillGame2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Kills**", value: `${topKillGame2} ${topKillGame1 > topKillGame2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Final Blows**", value: `${topFinalBlow1} ${topFinalBlow1 > topFinalBlow2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Final Blows**", value: `${topFinalBlow2} ${topFinalBlow1 > topFinalBlow2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Dommage fait**", value: `${topDmgDone1} ${topDmgDone1 > topDmgDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Dommage fait**", value: `${topDmgDone2} ${topDmgDone1 > topDmgDone2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Healing fait**", value: `${topHealingDone1} ${topHealingDone1 > topHealingDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Healing fait**", value: `${topHealingDone2} ${topHealingDone1 > topHealingDone2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true}
-      )
+      .addField("Profil de",  `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('Best en', '**une partie**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Kills**", `${topKillGame1} ${topKillGame1 > topKillGame2 ? "🟢" : "🔴"}`, true)
+      .addField("**Kills**", `${topKillGame2} ${topKillGame1 > topKillGame2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Final Blows**", `${topFinalBlow1} ${topFinalBlow1 > topFinalBlow2 ? "🟢" : "🔴"}`, true)
+      .addField("**Final Blows**", `${topFinalBlow2} ${topFinalBlow1 > topFinalBlow2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Dommage fait**", `${topDmgDone1} ${topDmgDone1 > topDmgDone2 ? "🟢" : "🔴"}`, true)
+      .addField("**Dommage fait**", `${topDmgDone2} ${topDmgDone1 > topDmgDone2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Healing fait**", `${topHealingDone1} ${topHealingDone1 > topHealingDone2 ? "🟢" : "🔴"}`, true)
+      .addField("**Healing fait**", `${topHealingDone2} ${topHealingDone1 > topHealingDone2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
 
       let timePlayed1 = account1.career_stats[hero]['Game']['TimePlayed']
       let timePlayed2 = account2.career_stats[hero]['Game']['TimePlayed']
@@ -630,32 +621,30 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 6 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'Total', value: '**LifeTime**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Temps de jeu**", value: `${timePlayed1} ${timePlayed1 > timePlayed2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Temps de jeu**", value: `${timePlayed2} ${timePlayed1 > timePlayed2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Kills**", value: `${allKill1} ${allKill1 > allKill2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Kills**", value: `${allKill2} ${allKill1 > allKill2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Objective Kills**", value: `${allobjKill1} ${allobjKill1 > allobjKill2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Objective Kills**", value: `${allobjKill2} ${allobjKill1 > allobjKill2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Objective Time**", value: `${allobjTime1} ${allobjTime1 > allobjTime2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Objective Time**", value: `${allobjTime2} ${allobjTime1 > allobjTime2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Dommage Fait**", value: `${allDmgDone1} ${allDmgDone1 > allDmgDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Dommage Fait**", value: `${allDmgDone2} ${allDmgDone1 > allDmgDone2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Healing fait**", value: `${allHealingDone1} ${allHealingDone1 > allhealingDone2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Healing fait**", value: `${allhealingDone2} ${allHealingDone1 > allhealingDone2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-      )
+      .addField("Profil de" , `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('Total', '**LifeTime**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Temps de jeu**", `${timePlayed1} ${timePlayed1 > timePlayed2 ? "🟢" : "🔴"}`, true)
+      .addField("**Temps de jeu**", `${timePlayed2} ${timePlayed1 > timePlayed2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Kills**", `${allKill1} ${allKill1 > allKill2 ? "🟢" : "🔴"}`, true)
+      .addField("**Kills**", `${allKill2} ${allKill1 > allKill2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Objective Kills**", `${allobjKill1} ${allobjKill1 > allobjKill2 ? "🟢" : "🔴"}`, true)
+      .addField("**Objective Kills**", `${allobjKill2} ${allobjKill1 > allobjKill2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Objective Time**", `${allobjTime1} ${allobjTime1 > allobjTime2 ? "🟢" : "🔴"}`, true)
+      .addField("**Objective Time**", `${allobjTime2} ${allobjTime1 > allobjTime2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Dommage Fait**", `${allDmgDone1} ${allDmgDone1 > allDmgDone2 ? "🟢" : "🔴"}`, true)
+      .addField("**Dommage Fait**", `${allDmgDone2} ${allDmgDone1 > allDmgDone2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Healing fait**", `${allHealingDone1} ${allHealingDone1 > allhealingDone2 ? "🟢" : "🔴"}`, true)
+      .addField("**Healing fait**", `${allhealingDone2} ${allHealingDone1 > allhealingDone2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
 
       let totalDeath1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['Deaths'] == 0 || account2.career_stats[hero]['Combat']['Deaths'] == undefined  ? 0 : account1.career_stats[hero]['Combat']['Deaths']
       let totalDeath2 = account2.career_stats[hero]['Combat'] == undefined || account2.career_stats[hero]['Combat']['Deaths'] == 0 || account2.career_stats[hero]['Combat']['Deaths'] == undefined  ? 0 : account2.career_stats[hero]['Combat']['Deaths']
@@ -668,23 +657,21 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 7 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'Total', value: '**LifeTime**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Morts**", value: `${totalDeath1} ${totalDeath1 < totalDeath2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Morts**", value: `${totalDeath2} ${totalDeath1 < totalDeath2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Solo Kills**", value: `${totalSolo1} ${totalSolo1 > totalSolo2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Solo Kills**", value: `${totalSolo2} ${totalSolo1 > totalSolo2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Final Blows**", value: `${totalFinal1} ${totalFinal1 > totalFinal2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**Final Blows**", value: `${totalFinal2} ${totalFinal1 > totalFinal2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-      )
+      .addField("Profil de" , `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('Total', '**LifeTime**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Morts**", `${totalDeath1} ${totalDeath1 < totalDeath2 ? "🟢" : "🔴"}`, true)
+      .addField("**Morts**", `${totalDeath2} ${totalDeath1 < totalDeath2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Solo Kills**", `${totalSolo1} ${totalSolo1 > totalSolo2 ? "🟢" : "🔴"}`,  true)
+      .addField("**Solo Kills**", `${totalSolo2} ${totalSolo1 > totalSolo2 ? "🔴" : "🟢"}`,  true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Final Blows**", `${totalFinal1} ${totalFinal1 > totalFinal2 ? "🟢" : "🔴"}`, true)
+      .addField("**Final Blows**", `${totalFinal2} ${totalFinal1 > totalFinal2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
 
       let totalCard1 = account1.career_stats[hero]['Match Awards']['Cards'] == undefined || account1.career_stats[hero]['Match Awards']['Cards'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards']
       let totalCard2 = account1.career_stats[hero]['Match Awards']['Cards'] == undefined || account1.career_stats[hero]['Match Awards']['Cards'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards']
@@ -701,29 +688,27 @@ bot.on("message", async (message) => {
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
       .setFooter(`Page 8 sur ${pages.length}`)
-      .addFields(
-        {name: "Profil de" , value: `**${nom1}**`, inline: true},
-        {name: "Profil de" , value: `**${nom2}**`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: 'Total', value: '**LifeTime**',inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Cards**", value: `${totalCard1} ${totalCard1 > totalCard2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Cards**", value: `${totalCard2} ${totalCard1 > totalCard2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**Medals**", value: `${totalMedals1} ${totalMedals1 > totalMedals2 ? "🟢" : "🔴"}`,inline:true},
-        {name: "**Medals**", value: `${totalMedals2} ${totalMedals1 > totalMedals2 ? "🔴" : "🟢"}`,inline:true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**🥇**", value: `${totalGold1} ${totalGold1 > totalGold2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**🥇**", value: `${totalGold2} ${totalGold1 > totalGold2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**🥈**", value: `${totalSilver1} ${totalSilver1 > totalSilver2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**🥈**", value: `${totalSilver2} ${totalSilver1 > totalSilver2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true},
-        {name: "**🥉**", value: `${totalBronze1} ${totalBronze1 > totalBronze2 ? "🟢" : "🔴"}`, inline: true},
-        {name: "**🥉**", value: `${totalBronze2} ${totalBronze1 > totalBronze2 ? "🔴" : "🟢"}`, inline: true},
-        {name: '\u200b', value: '\u200b', inline: true}
-      )
+      .addField("Profil de" , `**${nom1}**`, true)
+      .addField("Profil de" , `**${nom2}**`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField('Total', '**LifeTime**', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Cards**", `${totalCard1} ${totalCard1 > totalCard2 ? "🟢" : "🔴"}`, true)
+      .addField("**Cards**", `${totalCard2} ${totalCard1 > totalCard2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**Medals**", `${totalMedals1} ${totalMedals1 > totalMedals2 ? "🟢" : "🔴"}`, true)
+      .addField("**Medals**", `${totalMedals2} ${totalMedals1 > totalMedals2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**🥇**", `${totalGold1} ${totalGold1 > totalGold2 ? "🟢" : "🔴"}`, true)
+      .addField("**🥇**", `${totalGold2} ${totalGold1 > totalGold2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**🥈**", `${totalSilver1} ${totalSilver1 > totalSilver2 ? "🟢" : "🔴"}`, true)
+      .addField("**🥈**", `${totalSilver2} ${totalSilver1 > totalSilver2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
+      .addField("**🥉**", `${totalBronze1} ${totalBronze1 > totalBronze2 ? "🟢" : "🔴"}`, true)
+      .addField("**🥉**", `${totalBronze2} ${totalBronze1 > totalBronze2 ? "🔴" : "🟢"}`, true)
+      .addField('\u200b', '\u200b', true)
 
       let i = 0
       var loopDiff = setInterval(function(){
