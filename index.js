@@ -23,7 +23,7 @@ let diff5 = new Discord.MessageEmbed()
 let diff6 = new Discord.MessageEmbed()
 let diff7 = new Discord.MessageEmbed()
 let diff8 = new Discord.MessageEmbed()
-let pages = [diff, diff2, diff3, diff4, diff5, diff6, diff7, diff8]
+var pages = []
 let color = "c79304"
 let listeProfile = []
 fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
@@ -408,6 +408,8 @@ bot.on("message", async (message) => {
           throw ('PLAYER_NOT_EXIST2')
         }
       }
+      messageDiff = null
+      pages = []
 
       let account1 = await owapi.getModeStats(compte1.urlName, "competitive", "pc")
       let account2 = await owapi.getModeStats(compte2.urlName, "competitive", "pc")
@@ -432,10 +434,10 @@ bot.on("message", async (message) => {
       let lose1 = parseInt(account1.career_stats[hero]['Game']['GamesLost'])
       let lose2 = parseInt(account2.career_stats[hero]['Game']['GamesLost'])
 
-      diff
+      diff = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${capitalize(args[0])} et ${capitalize(args[1])} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 1 sur ${pages.length}`)
+      .setFooter(`Page 1 sur 8`)
       .addField("Profil de" , `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -451,6 +453,8 @@ bot.on("message", async (message) => {
       .addField("**Lose**", `${lose1} ${lose1 < lose2 ? "🟢" : "🔴"}`, true)
       .addField("**Lose**", `${lose2} ${lose1 < lose2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
+
+      pages.push(diff)
 
       message.channel.send(diff).then(sent =>{
         messageDiff = sent
@@ -472,10 +476,10 @@ bot.on("message", async (message) => {
       let healDone1 = account1.career_stats[hero]['Assists'] == undefined ? 0 : account1.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseInt(account1.career_stats[hero]['Assists']['HealingDone'] / account1.career_stats[hero]['Game']['GamesPlayed'])
       let healDone2 = account2.career_stats[hero]['Assists'] == undefined ? 0 : account2.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseInt(account2.career_stats[hero]['Assists']['HealingDone'] / account2.career_stats[hero]['Game']['GamesPlayed'])
       
-      diff2
+      diff2 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 2 sur ${pages.length}`)
+      .setFooter(`Page 2 sur 8`)
       .addField("Profil de", `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -500,6 +504,8 @@ bot.on("message", async (message) => {
       .addField("**Healing fait**", `${healDone1} ${healDone1 > healDone2 ? "🟢" : "🔴"}`, true)
       .addField("**Healing fait**", `${healDone2} ${healDone1 > healDone2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
+
+      pages.push(diff2)
       
       let deathsGame1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Combat']['Deaths'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let deathsGame2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Combat']['Deaths'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
@@ -514,10 +520,10 @@ bot.on("message", async (message) => {
       let cards1 = account1.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards'] == undefined ? 0: parseFloat((account1.career_stats[hero]['Match Awards']['Cards'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let cards2 = account2.career_stats[hero]['Game']['GamesPlayed'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['Cards'] == undefined ? 0: parseFloat((account2.career_stats[hero]['Match Awards']['Cards'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       
-      diff3
+      diff3 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 3 sur ${pages.length}`)
+      .setFooter(`Page 3 sur 8`)
       .addField("Profil de", `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -540,6 +546,8 @@ bot.on("message", async (message) => {
       .addField("**Cards**", `${cards2} ${cards1 > cards2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
 
+      pages.push(diff3)
+
       let medals1 = account1.career_stats[hero]['Match Awards']['Medals'] == undefined || account1.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['Medals'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let medals2 = account2.career_stats[hero]['Match Awards']['Medals'] == undefined || account2.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['Medals'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let gold1 = account1.career_stats[hero]['Match Awards']['MedalsGold'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsGold'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['MedalsGold'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
@@ -549,10 +557,10 @@ bot.on("message", async (message) => {
       let bronze1 = account1.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : parseFloat((account1.career_stats[hero]['Match Awards']['MedalsBronze'] / account1.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       let bronze2 = account2.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : parseFloat((account2.career_stats[hero]['Match Awards']['MedalsBronze'] / account2.career_stats[hero]['Game']['GamesPlayed']).toFixed(2))
       
-      diff4
+      diff4 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 4 sur ${pages.length}`)
+      .setFooter(`Page 4 sur 8`)
       .addField("Profil de" , `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -572,6 +580,8 @@ bot.on("message", async (message) => {
       .addField("**🥉**", `${bronze2} ${bronze1 > bronze2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
 
+      pages.push(diff4)
+
       let topKillGame1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['EliminationsMostinGame'] == 0 ? 0 : account1.career_stats[hero]['Best']['EliminationsMostinGame']
       let topKillGame2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['EliminationsMostinGame'] == 0 ? 0 : account2.career_stats[hero]['Best']['EliminationsMostinGame']
       let topFinalBlow1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['FinalBlowsMostinGame'] == 0 ? 0 : account1.career_stats[hero]['Best']['FinalBlowsMostinGame']
@@ -581,10 +591,10 @@ bot.on("message", async (message) => {
       let topHealingDone1 = account1.career_stats[hero]['Best'] == undefined || account1.career_stats[hero]['Best']['HealingDoneMostinGame'] == 0 || account1.career_stats[hero]['Best']['HealingDoneMostinGame'] == undefined ? 0 : account1.career_stats[hero]['Best']['HealingDoneMostinGame']
       let topHealingDone2 = account2.career_stats[hero]['Best'] == undefined || account2.career_stats[hero]['Best']['HealingDoneMostinGame'] == 0 || account2.career_stats[hero]['Best']['HealingDoneMostinGame'] == undefined ? 0 : account2.career_stats[hero]['Best']['HealingDoneMostinGame']
 
-      diff5
+      diff5 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 5 sur ${pages.length}`)
+      .setFooter(`Page 5 sur 8`)
       .addField("Profil de",  `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -604,6 +614,8 @@ bot.on("message", async (message) => {
       .addField("**Healing fait**", `${topHealingDone2} ${topHealingDone1 > topHealingDone2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
 
+      pages.push(diff5)
+
       let timePlayed1 = account1.career_stats[hero]['Game']['TimePlayed']
       let timePlayed2 = account2.career_stats[hero]['Game']['TimePlayed']
       let allKill1 = account1.career_stats[hero]['Combat'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Combat']['Eliminations'])
@@ -617,10 +629,10 @@ bot.on("message", async (message) => {
       let allHealingDone1 = account1.career_stats[hero]['Assists'] == undefined || account1.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseFloat(account1.career_stats[hero]['Assists']['HealingDone'])
       let allhealingDone2 = account2.career_stats[hero]['Assists'] == undefined || account2.career_stats[hero]['Assists']['HealingDone'] == undefined ? 0 : parseFloat(account2.career_stats[hero]['Assists']['HealingDone'])
 
-      diff6
+      diff6 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 6 sur ${pages.length}`)
+      .setFooter(`Page 6 sur 8`)
       .addField("Profil de" , `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -646,6 +658,8 @@ bot.on("message", async (message) => {
       .addField("**Healing fait**", `${allhealingDone2} ${allHealingDone1 > allhealingDone2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
 
+      pages.push(diff6)
+
       let totalDeath1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['Deaths'] == 0 || account2.career_stats[hero]['Combat']['Deaths'] == undefined  ? 0 : account1.career_stats[hero]['Combat']['Deaths']
       let totalDeath2 = account2.career_stats[hero]['Combat'] == undefined || account2.career_stats[hero]['Combat']['Deaths'] == 0 || account2.career_stats[hero]['Combat']['Deaths'] == undefined  ? 0 : account2.career_stats[hero]['Combat']['Deaths']
       let totalSolo1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['SoloKills'] == 0 || account2.career_stats[hero]['Combat']['SoloKills'] == undefined  ? 0 : account1.career_stats[hero]['Combat']['SoloKills']
@@ -653,10 +667,10 @@ bot.on("message", async (message) => {
       let totalFinal1 = account1.career_stats[hero]['Combat'] == undefined || account1.career_stats[hero]['Combat']['FinalBlows'] == 0 || account2.career_stats[hero]['Combat']['FinalBlows'] == undefined ? 0 : account1.career_stats[hero]['Combat']['FinalBlows']
       let totalFinal2 = account2.career_stats[hero]['Combat'] == undefined || account2.career_stats[hero]['Combat']['FinalBlows'] == 0 || account2.career_stats[hero]['Combat']['FinalBlows'] == undefined ? 0 : account2.career_stats[hero]['Combat']['FinalBlows']
 
-      diff7
+      diff7 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 7 sur ${pages.length}`)
+      .setFooter(`Page 7 sur 8`)
       .addField("Profil de" , `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -673,6 +687,8 @@ bot.on("message", async (message) => {
       .addField("**Final Blows**", `${totalFinal2} ${totalFinal1 > totalFinal2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
 
+      pages.push(diff7)
+
       let totalCard1 = account1.career_stats[hero]['Match Awards']['Cards'] == undefined || account1.career_stats[hero]['Match Awards']['Cards'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards']
       let totalCard2 = account1.career_stats[hero]['Match Awards']['Cards'] == undefined || account1.career_stats[hero]['Match Awards']['Cards'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Cards']
       let totalMedals1 = account1.career_stats[hero]['Match Awards']['Medals'] == undefined || account1.career_stats[hero]['Match Awards']['Medals'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['Medals']
@@ -684,10 +700,10 @@ bot.on("message", async (message) => {
       let totalBronze1 = account1.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account1.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : account1.career_stats[hero]['Match Awards']['MedalsBronze']
       let totalBronze2 = account2.career_stats[hero]['Match Awards']['MedalsBronze'] == undefined || account2.career_stats[hero]['Match Awards']['MedalsBronze'] == 0 ? 0 : account2.career_stats[hero]['Match Awards']['MedalsBronze']
 
-      diff8
+      diff8 = new Discord.MessageEmbed()
       .setTitle(`Qui est le plus fort entre ${diff.title.split(" ")[6]} et ${diff.title.split(" ")[8]} avec ${hero[0].toUpperCase()}`)
       .setColor(color)
-      .setFooter(`Page 8 sur ${pages.length}`)
+      .setFooter(`Page 8 sur 8`)
       .addField("Profil de" , `**${nom1}**`, true)
       .addField("Profil de" , `**${nom2}**`, true)
       .addField('\u200b', '\u200b', true)
@@ -710,20 +726,24 @@ bot.on("message", async (message) => {
       .addField("**🥉**", `${totalBronze2} ${totalBronze1 > totalBronze2 ? "🔴" : "🟢"}`, true)
       .addField('\u200b', '\u200b', true)
 
+      pages.push(diff8)
+
       let i = 0
       var loopDiff = setInterval(function(){
-        i ++
-
-        if(i == pages.length - 1) {
-          messageDiff.reactions.removeAll()
-          messageDiff.react("⬅️")
+        try {
+          i ++
+          
+          if(i == pages.length - 1) {
+            messageDiff.reactions.removeAll()
+            messageDiff.react("⬅️")
+          }
+          messageDiff.edit(pages[i])
+          page = i + 1
+          if(i == pages.length - 1) return clearInterval(loopDiff)  
+        } catch (error) {
+          return clearInterval(loopDiff)
         }
-       
-        messageDiff.edit(pages[i])
-        page = i + 1
-        if(i == pages.length - 1) return clearInterval(loopDiff)
       }, 5000);
-
     } catch (err){
       console.log(err)
       if(err == 'PLAYER_NOT_EXIST') {
@@ -797,7 +817,6 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     }else if(reaction.emoji.name == "⬅️") {
       await reaction.users.remove(user.id)
       page --
-      console.log(page)
       if(page == 0) return page ++
 
       if(page != pages.length) {
