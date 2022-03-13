@@ -7,7 +7,7 @@ const bot = new Discord.Client();
 var fs = require('fs');
 require("dotenv").config()
 
-let channel = /*"944064019155804180"*/ "828518673244618752"
+let channel = "828518673244618752" //"828518673244618752" 944064019155804180 <- off
 let prefix = "!"
 let idMessage = null
 let diffId = null
@@ -38,7 +38,7 @@ function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-bot.on('ready', () => {
+bot.on('ready', async () => {
   console.log("bot online")
   console.log(new Date().toLocaleString())
   bot.user.setActivity(`shattering air ${prefix}help`, {type: "WATCHING", })
@@ -49,19 +49,28 @@ var updateProfil = async function() {
     try {
       listeProfile[i].name = listeProfile[i].name.replace(/-/g,"#")
       var stats = await ow.getAllStats(listeProfile[i].name.replace(/#/g,"-"), 'pc')
-      if(listeProfile[i].tankSr[9] != (stats.rank.tank? stats.rank.tank.sr : 0) || listeProfile[i].dpsSr[9] != (stats.rank.damage? stats.rank.damage.sr : 0)  || listeProfile[i].supportSr[9] != (stats.rank.support? stats.rank.support.sr : 0)) {
+      if(listeProfile[i].timePlayed[1] != stats.heroStats.competitive.overall.game.time_played) {
         let listeSrTank = listeProfile[i].tankSr
         let listeSrDps = listeProfile[i].dpsSr
         let listeSrSupport = listeProfile[i].supportSr
+        let gameplayed = listeProfile[i].TotalGames
+        let timePlayed = listeProfile[i].timePlayed
         listeSrTank.shift()
         listeSrDps.shift()
         listeSrSupport.shift()
+        gameplayed.shift()
+        timePlayed.shift()
         stats.rank.tank? listeSrTank.push(parseInt(stats.rank.tank.sr)) : listeSrTank.push(0)
         stats.rank.damage? listeSrDps.push(parseInt(stats.rank.damage.sr)) : listeSrDps.push(0)
         stats.rank.support? listeSrSupport.push(parseInt(stats.rank.support.sr)) : listeSrSupport.push(0)
+        timePlayed.push(stats.heroStats.competitive.overall.game.time_played)
+        gameplayed.push(stats.heroStats.competitive.overall.game.games_played)
         listeProfile[i].tankSr = listeSrTank
         listeProfile[i].dpsSr = listeSrDps
         listeProfile[i].supportSr = listeSrSupport
+        listeProfile[i].timePlayed = timePlayed
+        listeProfile[i].TotalGames = gameplayed
+
         fs.writeFile('./src/data.json', JSON.stringify(listeProfile), 'utf8', function(err) {
           if (err) throw err;})
         messageUpdate(listeProfile[i])
@@ -137,20 +146,24 @@ var messageUpdate = function(profil) {
     .setWidth(1000)
     .setHeight(500)
     .setBackgroundColor('transparent');
+
     try {
       bot.channels.cache.get(channel).send(new Discord.MessageEmbed()
       .setTitle(`${profil.nickName} vient de finir une session! Voici un résumé:`)
+      .setThumbnail(profil.thumbnail)
       .addFields(
+        {name: `Temps de jeux`, value: `${profil.timePlayed[1].split(":").length >= 3 ? new Date(((profil.timePlayed[1].split(":")[0]) * 60 * 60 + (+profil.timePlayed[1].split(":")[1]) * 60 + (+profil.timePlayed[1].split(":")[2])) * 1000).toISOString().slice(12,19) : new Date(((profil.timePlayed[1].split(":")[0]) * 60 + (+profil.timePlayed[1].split(":")[1])) * 1000).toISOString().slice(14,19)}`, inline: false},
+        {name: `Partie joués`, value: `${parseInt(profil.TotalGames[1]) - parseInt(profil.TotalGames[0])}`, inline: false},
         {name: `Tank`, value: `${(profil.tankSr[9] - profil.tankSr[8]) < 0 ? '🔴': (profil.tankSr[9] - profil.tankSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.tankSr[9] - profil.tankSr[8]}`, inline: true},
         {name: `Dps`, value: `${(profil.dpsSr[9] - profil.dpsSr[8]) < 0 ? '🔴': (profil.dpsSr[9] - profil.dpsSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.dpsSr[9] - profil.dpsSr[8]}`, inline: true},
         {name: `Support`, value: `${(profil.supportSr[9] - profil.supportSr[8]) < 0 ? '🔴': (profil.supportSr[9] - profil.supportSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.supportSr[9] - profil.supportSr[8]}`, inline: true})
       .setImage(await LastSrChartEnd.getShortUrl())
       .setColor(color))  
     } catch (error) {
-      bot.channels.cache.get(channel).send("Veuillez réessayer! Un problème est survenu!")
+      console.log(error)
     }
     }, 1000);
-  }, 100000);
+  }, 10000);
 }
 
 var compData = async function(profil, isSaved = true) {
@@ -186,12 +199,14 @@ setInterval(
           listeProfile = JSON.parse(jsonString);
         }
       })
-      updateProfil()
       console.log(".")  
+      updateProfil()
     } catch (error) {
       console.log(error)
     }
-  }, /*600000*/600000);
+  }, /*900000*/900000);  
+
+
 
 
 bot.on("message", async (message) => {
@@ -205,6 +220,7 @@ bot.on("message", async (message) => {
   if(cmd == "addprofile") {
     try {
       var compte = Object.entries(await owapi.getAccountByName(args[0]))
+      console.log(compte)
       for (let i = 0; i < compte.length; i++) {
         if(compte[i][1].platform == "pc") {
           compte = compte[i][1]
@@ -213,7 +229,8 @@ bot.on("message", async (message) => {
         }
       }
       let owCompte = await ow.getBasicInfo(compte.urlName, "pc")
-      compte1 = await owapi.getGeneralStats(compte.urlName, "pc")
+      console.log(owCompte)
+      compte1 = await owapi.getGeneralStats(compte.name, "pc")
       let mostplayed = Object.entries((await ow.getMostPlayed(compte.urlName, "pc")).competitive)
       nomCompte = compte.name
 
@@ -234,13 +251,15 @@ bot.on("message", async (message) => {
         idMessage = confirmProf.id
       
     } catch (err) {
-      console.log(err)
       if(err == 'PLAYER_NOT_EXIST') {
         message.reply('Ce compte n\'existe pas!')
         return;
       }else if(err == 'ACCOUNT_PRIVATE') {
         message.reply('La carrière de ce compte est privée!')
         return;
+      }else{
+        console.log("erreur")
+        console.log(err)
       }
     }
   }
@@ -331,14 +350,21 @@ bot.on("message", async (message) => {
       .setFooter(`Données mise à jour le ${statsProfil.lastUpdate}`)
     message.channel.send(messageCompStats)
     }, 1000);
-    if(args[1] == "tank") {
-      
-    }else if(args[1] == "dps") {
+  }
 
-    }else if(args[1] == "support") {
-
-    }else{
-
+  else if(cmd == "update") {
+    try {
+      fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
+        if(err) {
+          console.log(err);
+        }else{
+          listeProfile = JSON.parse(jsonString);
+        }
+      })
+      console.log(".")  
+      updateProfil()
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -780,9 +806,9 @@ bot.on("message", async (message) => {
 
 bot.on('messageReactionAdd', async (reaction, user) => {
   if(user.bot) return
-
+  if(reaction.count > 2) return
   if(reaction.message.id == idMessage) {
-    let nomStats = nomCompte.replace(/#/g,"-")
+    let nomStats = nomCompte.replace("#","-")
     if(!listeProfile.some(profil => profil.name == nomStats)) {
       var stats = await ow.getAllStats(nomStats, 'pc');
       let nickName = nomCompte.split('#')
@@ -817,6 +843,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     }else if(reaction.emoji.name == "⬅️") {
       await reaction.users.remove(user.id)
       page --
+      console.log(page)
       if(page == 0) return page ++
 
       if(page != pages.length) {

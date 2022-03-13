@@ -9,6 +9,8 @@ class Profil {
     this.tankSr = [0, 0, 0, 0, 0, 0, 0, 0, 0, Tsr]
     this.dpsSr = [0, 0, 0, 0, 0, 0, 0, 0, 0, Dsr]
     this.supportSr = [0, 0, 0, 0, 0, 0, 0, 0, 0, Ssr]
+    this.timePlayed = [0, 0]
+    this.TotalGames = [0, 0]
     this.winrate = 0
     this.gold = {nb: 0, avg: 0}
     this.silver = {nb: 0, avg: 0}
