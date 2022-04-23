@@ -13,7 +13,9 @@
     "chartjs-to-image": "^1.0.5",
     "discord.js": "^12.5.3",
     "dotenv": "^16.0.0",
+    "overwatch-api": "^0.10.5",
     "overwatch-stats-api": "^2.1.0",
+    "overwatchleague": "^2.2.1",
     "owapi": "^2.1.1"
   }
 }

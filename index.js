@@ -7,12 +7,11 @@ const bot = new Discord.Client();
 var fs = require('fs');
 require("dotenv").config()
 
-let channel = "828518673244618752" //"828518673244618752" 944064019155804180 <- off
+let channel = "944064019155804180" //"828518673244618752" 944064019155804180 <- off
 let prefix = "!"
 let idMessage = null
 let diffId = null
 let nomCompte = null
-let compte1 = null
 let messageDiff = null
 let page = 0
 let diff = new Discord.MessageEmbed()
@@ -55,16 +54,22 @@ var updateProfil = async function() {
         let listeSrSupport = listeProfile[i].supportSr
         let gameplayed = listeProfile[i].TotalGames
         let timePlayed = listeProfile[i].timePlayed
+        let win = listeProfile[i].win
+        let lose = listeProfile[i].lose
         listeSrTank.shift()
         listeSrDps.shift()
         listeSrSupport.shift()
         gameplayed.shift()
         timePlayed.shift()
+        win.shift()
+        lose.shift()
         stats.rank.tank? listeSrTank.push(parseInt(stats.rank.tank.sr)) : listeSrTank.push(0)
         stats.rank.damage? listeSrDps.push(parseInt(stats.rank.damage.sr)) : listeSrDps.push(0)
         stats.rank.support? listeSrSupport.push(parseInt(stats.rank.support.sr)) : listeSrSupport.push(0)
         timePlayed.push(stats.heroStats.competitive.overall.game.time_played)
         gameplayed.push(stats.heroStats.competitive.overall.game.games_played)
+        win.push(stats.heroStats.competitive.overall.game.games_won)
+        lose.push((await owapi.getAllStats(listeProfile[i].name, "pc")).competitive.career_stats['all heroes']['Game']['GamesLost'])
         listeProfile[i].tankSr = listeSrTank
         listeProfile[i].dpsSr = listeSrDps
         listeProfile[i].supportSr = listeSrSupport
@@ -104,26 +109,26 @@ var messageUpdate = function(profil) {
     LastSrChartEnd.setConfig({
       type: 'line',
       data: { statsProfil,
-        labels: ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1', ], 
+        labels: ['15', '14', '13', '12', '11' ,'10', '9', '8', '7', '6', '5', '4', '3', '2', '1'], 
         datasets: [
           {
             label: 'Tank SR', 
             fill: false,
             backgroundColor: "#5cb6ed",
             borderColor: "#5cb6ed",
-            data: [statsProfil.tankSr[0],statsProfil.tankSr[1],statsProfil.tankSr[2],statsProfil.tankSr[3],statsProfil.tankSr[4],statsProfil.tankSr[5],statsProfil.tankSr[6],statsProfil.tankSr[7],statsProfil.tankSr[8],statsProfil.tankSr[9]]
+            data: [statsProfil.tankSr[0],statsProfil.tankSr[1],statsProfil.tankSr[2],statsProfil.tankSr[3],statsProfil.tankSr[4],statsProfil.tankSr[5],statsProfil.tankSr[6],statsProfil.tankSr[7],statsProfil.tankSr[8],statsProfil.tankSr[9],statsProfil.tankSr[10],statsProfil.tankSr[11],statsProfil.tankSr[12],statsProfil.tankSr[13],statsProfil.tankSr[14]]
           },{
             label: 'DPS SR', 
             fill: false,
             backgroundColor: "#ed5d53",
             borderColor: "#ed5d53",
-            data: [statsProfil.dpsSr[0],statsProfil.dpsSr[1],statsProfil.dpsSr[2],statsProfil.dpsSr[3],statsProfil.dpsSr[4],statsProfil.dpsSr[5],statsProfil.dpsSr[6],statsProfil.dpsSr[7],statsProfil.dpsSr[8],statsProfil.dpsSr[9]]
+            data: [statsProfil.dpsSr[0],statsProfil.dpsSr[1],statsProfil.dpsSr[2],statsProfil.dpsSr[3],statsProfil.dpsSr[4],statsProfil.dpsSr[5],statsProfil.dpsSr[6],statsProfil.dpsSr[7],statsProfil.dpsSr[8],statsProfil.dpsSr[9],statsProfil.dpsSr[10],statsProfil.dpsSr[11],statsProfil.dpsSr[12],statsProfil.dpsSr[13],statsProfil.dpsSr[14]]
           },{
             label: 'Support SR', 
             fill: false,
             backgroundColor: "#4d8a33",
             borderColor: "#4d8a33",
-            data: [statsProfil.supportSr[0],statsProfil.supportSr[1],statsProfil.supportSr[2],statsProfil.supportSr[3],statsProfil.supportSr[4],statsProfil.supportSr[5],statsProfil.supportSr[6],statsProfil.supportSr[7],statsProfil.supportSr[8],statsProfil.supportSr[9]]
+            data: [statsProfil.supportSr[0],statsProfil.supportSr[1],statsProfil.supportSr[2],statsProfil.supportSr[3],statsProfil.supportSr[4],statsProfil.supportSr[5],statsProfil.supportSr[6],statsProfil.supportSr[7],statsProfil.supportSr[8],statsProfil.supportSr[9],statsProfil.supportSr[10],statsProfil.supportSr[11],statsProfil.supportSr[12],statsProfil.supportSr[13],statsProfil.supportSr[14]]
           }
         ],
       },
@@ -148,15 +153,19 @@ var messageUpdate = function(profil) {
     .setBackgroundColor('transparent');
 
     try {
+      let tempsJeux = new Date(((profil.timePlayed[1].split(":").length >= 3 ? new Date((profil.timePlayed[1].split(":")[0]) * 60 * 60 + (+profil.timePlayed[1].split(":")[1]) * 60 + (+profil.timePlayed[1].split(":")[2])) : new Date((profil.timePlayed[1].split(":")[0]) * 60 + (+profil.timePlayed[1].split(":")[1]))) - (profil.timePlayed[0].split(":").length >= 3 ? new Date((profil.timePlayed[0].split(":")[0]) * 60 * 60 + (+profil.timePlayed[0].split(":")[1]) * 60 + (+profil.timePlayed[0].split(":")[2])) : new Date((profil.timePlayed[0].split(":")[0]) * 60 + (+profil.timePlayed[0].split(":")[1])))) * 1000).toISOString().slice(11,19)
+
       bot.channels.cache.get(channel).send(new Discord.MessageEmbed()
       .setTitle(`${profil.nickName} vient de finir une session! Voici un résumé:`)
       .setThumbnail(profil.thumbnail)
       .addFields(
-        {name: `Temps de jeux`, value: `${profil.timePlayed[1].split(":").length >= 3 ? new Date(((profil.timePlayed[1].split(":")[0]) * 60 * 60 + (+profil.timePlayed[1].split(":")[1]) * 60 + (+profil.timePlayed[1].split(":")[2])) * 1000).toISOString().slice(12,19) : new Date(((profil.timePlayed[1].split(":")[0]) * 60 + (+profil.timePlayed[1].split(":")[1])) * 1000).toISOString().slice(14,19)}`, inline: false},
-        {name: `Partie joués`, value: `${parseInt(profil.TotalGames[1]) - parseInt(profil.TotalGames[0])}`, inline: false},
-        {name: `Tank`, value: `${(profil.tankSr[9] - profil.tankSr[8]) < 0 ? '🔴': (profil.tankSr[9] - profil.tankSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.tankSr[9] - profil.tankSr[8]}`, inline: true},
-        {name: `Dps`, value: `${(profil.dpsSr[9] - profil.dpsSr[8]) < 0 ? '🔴': (profil.dpsSr[9] - profil.dpsSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.dpsSr[9] - profil.dpsSr[8]}`, inline: true},
-        {name: `Support`, value: `${(profil.supportSr[9] - profil.supportSr[8]) < 0 ? '🔴': (profil.supportSr[9] - profil.supportSr[8]) > 0 ?'🟢' : '⚪️'} ${profil.supportSr[9] - profil.supportSr[8]}`, inline: true})
+        {name: `Temps de jeux`, value: `${tempsJeux}`, inline: false},
+        {name: `Parties jouées`, value: `${parseInt(profil.TotalGames[1]) - parseInt(profil.TotalGames[0])}`, inline: true},
+        {name: `Win`, value: `${parseInt(profil.win[1])} - ${parseInt(profil.win[0])} ${parseInt(profil.win[1]) - parseInt(profil.win[0]) > 0 ? '🟢' : '⚪️'}`, inline: true},
+        {name: `Lose`, value: `${parseInt(profil.lose[1])} - ${parseInt(profil.lose[0])} ${parseInt(profil.lose[1]) - parseInt(profil.lose[0]) > 0 ? '🟢' : '⚪️'}`, inline: true},
+        {name: `Tank`, value: `${(profil.tankSr[14] - profil.tankSr[13]) < 0 ? '🔴': (profil.tankSr[14] - profil.tankSr[13]) > 0 ?'🟢' : '⚪️'} ${profil.tankSr[14] - profil.tankSr[13]}`, inline: true},
+        {name: `Dps`, value: `${(profil.dpsSr[14] - profil.dpsSr[13]) < 0 ? '🔴': (profil.dpsSr[14] - profil.dpsSr[13]) > 0 ?'🟢' : '⚪️'} ${profil.dpsSr[14] - profil.dpsSr[13]}`, inline: true},
+        {name: `Support`, value: `${(profil.supportSr[14] - profil.supportSr[13]) < 0 ? '🔴': (profil.supportSr[14] - profil.supportSr[13]) > 0 ?'🟢' : '⚪️'} ${profil.supportSr[14] - profil.supportSr[13]}`, inline: true})
       .setImage(await LastSrChartEnd.getShortUrl())
       .setColor(color))  
     } catch (error) {
@@ -219,17 +228,16 @@ bot.on("message", async (message) => {
 
   if(cmd == "addprofile") {
     try {
-      var compte = Object.entries(await owapi.getAccountByName(args[0]))
+      var compte = Object.entries(await owapi.getAccountByName(args[0].replace(/#/g,"-")))
       console.log(compte)
       for (let i = 0; i < compte.length; i++) {
-        if(compte[i][1].platform == "pc") {
+        if(compte[i][1].name == args[0] && compte[i][1].platform == "pc") {
           compte = compte[i][1]
-        }else{
+        }else if(i == compte.length){
           throw ('PLAYER_NOT_EXIST')
         }
       }
       let owCompte = await ow.getBasicInfo(compte.urlName, "pc")
-      console.log(owCompte)
       compte1 = await owapi.getGeneralStats(compte.name, "pc")
       let mostplayed = Object.entries((await ow.getMostPlayed(compte.urlName, "pc")).competitive)
       nomCompte = compte.name
@@ -251,6 +259,7 @@ bot.on("message", async (message) => {
         idMessage = confirmProf.id
       
     } catch (err) {
+      console.log(err)
       if(err == 'PLAYER_NOT_EXIST') {
         message.reply('Ce compte n\'existe pas!')
         return;
@@ -285,26 +294,26 @@ bot.on("message", async (message) => {
     LastSrChart.setConfig({
       type: 'line',
       data: { statsProfil,
-        labels: ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1', ], 
+        labels: ['15', '14', '13', '12', '11' ,'10', '9', '8', '7', '6', '5', '4', '3', '2', '1'], 
         datasets: [
           {
             label: 'Tank SR', 
             fill: false,
             backgroundColor: "#5cb6ed",
             borderColor: "#5cb6ed",
-            data: [statsProfil.tankSr[0],statsProfil.tankSr[1],statsProfil.tankSr[2],statsProfil.tankSr[3],statsProfil.tankSr[4],statsProfil.tankSr[5],statsProfil.tankSr[6],statsProfil.tankSr[7],statsProfil.tankSr[8],statsProfil.tankSr[9]]
+            data: [statsProfil.tankSr[0],statsProfil.tankSr[1],statsProfil.tankSr[2],statsProfil.tankSr[3],statsProfil.tankSr[4],statsProfil.tankSr[5],statsProfil.tankSr[6],statsProfil.tankSr[7],statsProfil.tankSr[8],statsProfil.tankSr[9],statsProfil.tankSr[10],statsProfil.tankSr[11],statsProfil.tankSr[12],statsProfil.tankSr[13],statsProfil.tankSr[14]]
           },{
             label: 'DPS SR', 
             fill: false,
             backgroundColor: "#ed5d53",
             borderColor: "#ed5d53",
-            data: [statsProfil.dpsSr[0],statsProfil.dpsSr[1],statsProfil.dpsSr[2],statsProfil.dpsSr[3],statsProfil.dpsSr[4],statsProfil.dpsSr[5],statsProfil.dpsSr[6],statsProfil.dpsSr[7],statsProfil.dpsSr[8],statsProfil.dpsSr[9]]
+            data: [statsProfil.dpsSr[0],statsProfil.dpsSr[1],statsProfil.dpsSr[2],statsProfil.dpsSr[3],statsProfil.dpsSr[4],statsProfil.dpsSr[5],statsProfil.dpsSr[6],statsProfil.dpsSr[7],statsProfil.dpsSr[8],statsProfil.dpsSr[9],statsProfil.dpsSr[10],statsProfil.dpsSr[11],statsProfil.dpsSr[12],statsProfil.dpsSr[13],statsProfil.dpsSr[14]]
           },{
             label: 'Support SR', 
             fill: false,
             backgroundColor: "#4d8a33",
             borderColor: "#4d8a33",
-            data: [statsProfil.supportSr[0],statsProfil.supportSr[1],statsProfil.supportSr[2],statsProfil.supportSr[3],statsProfil.supportSr[4],statsProfil.supportSr[5],statsProfil.supportSr[6],statsProfil.supportSr[7],statsProfil.supportSr[8],statsProfil.supportSr[9]]
+            data: [statsProfil.supportSr[0],statsProfil.supportSr[1],statsProfil.supportSr[2],statsProfil.supportSr[3],statsProfil.supportSr[4],statsProfil.supportSr[5],statsProfil.supportSr[6],statsProfil.supportSr[7],statsProfil.supportSr[8],statsProfil.supportSr[9],statsProfil.supportSr[10],statsProfil.supportSr[11],statsProfil.supportSr[12],statsProfil.supportSr[13],statsProfil.supportSr[14]]
           }
         ],
       },
@@ -338,9 +347,9 @@ bot.on("message", async (message) => {
     .setColor(color)
     .addField("Winrate", `${statsProfil.winrate} %`)
     .addFields(
-      {name: "🛡️", value: `${statsProfil.tankSr[9]}`, inline: true},
-      {name: "⚔️", value: `${statsProfil.dpsSr[9]}`, inline: true},
-      {name: "❤️", value: `${(statsProfil.supportSr[9])}`, inline: true},
+      {name: "🛡️", value: `${statsProfil.tankSr[14]}`, inline: true},
+      {name: "⚔️", value: `${statsProfil.dpsSr[14]}`, inline: true},
+      {name: "❤️", value: `${(statsProfil.supportSr[14])}`, inline: true},
       {name: "Kills", value: `${statsProfil.kills.nb} \n (${statsProfil.kills.avg})`, inline: true},
       {name: "Morts", value: `${statsProfil.deaths.nb} \n (${statsProfil.deaths.avg})`, inline: true},
       {name: "Ratio", value: `${(statsProfil.kills.nb / statsProfil.deaths.nb).toFixed(2)}`, inline: true},
@@ -843,7 +852,6 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     }else if(reaction.emoji.name == "⬅️") {
       await reaction.users.remove(user.id)
       page --
-      console.log(page)
       if(page == 0) return page ++
 
       if(page != pages.length) {
