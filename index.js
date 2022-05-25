@@ -11,9 +11,14 @@ let channel = "944064019155804180" //"828518673244618752" 944064019155804180 <- 
 let prefix = "!"
 let idMessage = null
 let diffId = null
+let rankId = null
+let messageRank = null
 let nomCompte = null
 let messageDiff = null
 let page = 0
+let pageRank = 0
+let type = null
+let rankEmbed = new Discord.MessageEmbed()
 let diff = new Discord.MessageEmbed()
 let diff2 = new Discord.MessageEmbed()
 let diff3 = new Discord.MessageEmbed()
@@ -22,9 +27,13 @@ let diff5 = new Discord.MessageEmbed()
 let diff6 = new Discord.MessageEmbed()
 let diff7 = new Discord.MessageEmbed()
 let diff8 = new Discord.MessageEmbed()
+let rankGen = new ChartJsImage();
 var pages = []
 let color = "c79304"
 let listeProfile = []
+let profils = []
+let listeNicknames = []
+let listeSr = []
 fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
   if(err) {
     console.log(err);
@@ -41,6 +50,7 @@ bot.on('ready', async () => {
   console.log("bot online")
   console.log(new Date().toLocaleString())
   bot.user.setActivity(`shattering air ${prefix}help`, {type: "WATCHING", })
+  updateProfil()
 })
 
 var updateProfil = async function() {
@@ -63,9 +73,9 @@ var updateProfil = async function() {
         timePlayed.shift()
         win.shift()
         lose.shift()
-        stats.rank.tank? listeSrTank.push(parseInt(stats.rank.tank.sr)) : listeSrTank.push(0)
-        stats.rank.damage? listeSrDps.push(parseInt(stats.rank.damage.sr)) : listeSrDps.push(0)
-        stats.rank.support? listeSrSupport.push(parseInt(stats.rank.support.sr)) : listeSrSupport.push(0)
+        stats.rank.tank? listeSrTank.push(parseInt(stats.rank.tank.sr)) : listeSrTank.push(listeSrTank[13])
+        stats.rank.damage? listeSrDps.push(parseInt(stats.rank.damage.sr)) : listeSrDps.push(listeSrDps[13])
+        stats.rank.support? listeSrSupport.push(parseInt(stats.rank.support.sr)) : listeSrSupport.push(listeSrSupport[13])
         timePlayed.push(stats.heroStats.competitive.overall.game.time_played)
         gameplayed.push(stats.heroStats.competitive.overall.game.games_played)
         win.push(stats.heroStats.competitive.overall.game.games_won)
@@ -79,9 +89,18 @@ var updateProfil = async function() {
         fs.writeFile('./src/data.json', JSON.stringify(listeProfile), 'utf8', function(err) {
           if (err) throw err;})
         messageUpdate(listeProfile[i])
+
       }else{
         console.log("Rien")
       }
+
+      if(i == listeProfile.length - 1) {
+        setTimeout(() => {
+          updateProfil()
+          console.log(".")
+        }, 5000);
+      }
+
     } catch (error) {
       console.log(error)
     }
@@ -160,9 +179,9 @@ var messageUpdate = function(profil) {
       .setThumbnail(profil.thumbnail)
       .addFields(
         {name: `Temps de jeux`, value: `${tempsJeux}`, inline: false},
-        {name: `Parties jouées`, value: `${parseInt(profil.TotalGames[1]) - parseInt(profil.TotalGames[0])}`, inline: true},
-        {name: `Win`, value: `${parseInt(profil.win[1])} - ${parseInt(profil.win[0])} ${parseInt(profil.win[1]) - parseInt(profil.win[0]) > 0 ? '🟢' : '⚪️'}`, inline: true},
-        {name: `Lose`, value: `${parseInt(profil.lose[1])} - ${parseInt(profil.lose[0])} ${parseInt(profil.lose[1]) - parseInt(profil.lose[0]) > 0 ? '🟢' : '⚪️'}`, inline: true},
+        {name: `Parties jouées`, value: `${parseInt(profil.TotalGames[1]) - parseInt(profil.TotalGames[0]) > 0 ? parseInt(profil.TotalGames[1]) - parseInt(profil.TotalGames[0]) : parseInt(profil.TotalGames[1])}`, inline: true},
+        {name: `Win`, value: `${parseInt(profil.win[1]) - parseInt(profil.win[0]) > 0 ? parseInt(profil.win[1]) - parseInt(profil.win[0]) : parseInt(profil.win[1])} ${parseInt(profil.win[1]) - parseInt(profil.win[0]) > 0 ? '🟢' : '⚪️'}`, inline: true},
+        {name: `Lose`, value: `${parseInt(profil.lose[1]) - parseInt(profil.lose[0]) > 0 ? parseInt(profil.lose[1]) - parseInt(profil.lose[0]) : parseInt(profil.lose[1])} ${parseInt(profil.lose[1]) - parseInt(profil.lose[0]) > 0 ? '🔴' : '⚪️'}`, inline: true},
         {name: `Tank`, value: `${(profil.tankSr[14] - profil.tankSr[13]) < 0 ? '🔴': (profil.tankSr[14] - profil.tankSr[13]) > 0 ?'🟢' : '⚪️'} ${profil.tankSr[14] - profil.tankSr[13]}`, inline: true},
         {name: `Dps`, value: `${(profil.dpsSr[14] - profil.dpsSr[13]) < 0 ? '🔴': (profil.dpsSr[14] - profil.dpsSr[13]) > 0 ?'🟢' : '⚪️'} ${profil.dpsSr[14] - profil.dpsSr[13]}`, inline: true},
         {name: `Support`, value: `${(profil.supportSr[14] - profil.supportSr[13]) < 0 ? '🔴': (profil.supportSr[14] - profil.supportSr[13]) > 0 ?'🟢' : '⚪️'} ${profil.supportSr[14] - profil.supportSr[13]}`, inline: true})
@@ -197,26 +216,6 @@ var compData = async function(profil, isSaved = true) {
     })
   }
 }
-
-setInterval(
-  () => {
-    try {
-      fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
-        if(err) {
-          console.log(err);
-        }else{
-          listeProfile = JSON.parse(jsonString);
-        }
-      })
-      console.log(".")  
-      updateProfil()
-    } catch (error) {
-      console.log(error)
-    }
-  }, /*900000*/900000);  
-
-
-
 
 bot.on("message", async (message) => {
   if(message.bot) return
@@ -267,7 +266,6 @@ bot.on("message", async (message) => {
         message.reply('La carrière de ce compte est privée!')
         return;
       }else{
-        console.log("erreur")
         console.log(err)
       }
     }
@@ -420,6 +418,270 @@ bot.on("message", async (message) => {
         message.reply('La carrière de ce compte est privée!')
         return;
       }
+    }
+  }
+
+  else if(cmd == "rank") {
+    listeNicknames = []
+    profils = []
+    listeSr = []
+    pageRank = 1
+    let i = 0
+    messageRank = null
+    rankEmbed = new Discord.MessageEmbed()
+    type = null
+    try {
+      fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
+        if(err) {
+          console.log(err);
+        }else{
+          listeProfile = JSON.parse(jsonString);
+        }
+      })
+    } catch (error) {
+      console.log(error)
+    }
+    rankEmbed.setColor(color)
+
+    switch (args[0]) {
+      case "tank":
+        type = "tank"
+        listeProfile.sort((a, b) => (a.tankSr[a.tankSr.length - 1]) < (b.tankSr[b.tankSr.length - 1]) ? 1 : -1).slice(0, listeProfile.length).
+        forEach(e => {
+          i ++
+          if(e.tankSr[e.tankSr.length - 1] == 0) return
+          profils.push(e)
+          listeSr.push(e.tankSr[e.tankSr.length - 1])
+          listeNicknames.push(e.nickName)
+          if(i < 11) rankEmbed.addField(e.nickName, `${e.tankSr[e.tankSr.length - 1]}`)
+        });
+
+        rankEmbed.setThumbnail(profils[0].thumbnail)
+        rankGen = new ChartJsImage();
+        rankGen.setConfig({
+          type: 'line',
+          data: { statsProfil,
+            labels: listeNicknames,
+            datasets: [
+              {
+                label: 'Tank SR', 
+                fill: false,
+                backgroundColor: "#c9f744",
+                borderColor: "#c9f744",
+                data: listeSr,
+              }
+            ],
+          },
+          options: {
+            plugins: {
+              datalabels: {
+                display: true,
+                align: 'top',
+                color: "#ffffff",
+                backgroundColor: '#2e2e2e',
+                borderRadius: 3,
+              },
+            },
+            scales: {
+              y: {
+                suggestedMin: 1500,
+              }
+            }
+          },
+        })
+        
+        .setWidth(1000)
+        .setHeight(500)
+        .setBackgroundColor('transparent');
+
+        rankEmbed.setImage(await rankGen.getShortUrl())
+
+        message.channel.send(rankEmbed).then(sent => {
+          messageRank = sent
+          rankId = sent.id
+          messageRank.react("➡️")
+        })
+        break;
+        
+      case "dps":
+        type = "dps"
+        listeProfile.sort((a, b) => (a.dpsSr[a.dpsSr.length - 1]) < (b.dpsSr[b.dpsSr.length - 1]) ? 1 : -1).slice(0, listeProfile.length).
+        forEach(e => {
+          i ++
+          if(e.dpsSr[e.dpsSr.length - 1] == 0) return
+          profils.push(e)
+          listeSr.push(e.dpsSr[e.dpsSr.length - 1])
+          listeNicknames.push(e.nickName)
+          if(i < 11) rankEmbed.addField(e.nickName, `${e.dpsSr[e.dpsSr.length - 1]}`)
+        });
+
+        rankEmbed.setThumbnail(profils[0].thumbnail)
+        rankGen = new ChartJsImage();
+        rankGen.setConfig({
+          type: 'line',
+          data: { statsProfil,
+            labels: listeNicknames,
+            datasets: [
+              {
+                label: 'Dps SR', 
+                fill: false,
+                backgroundColor: "#c9f744",
+                borderColor: "#c9f744",
+                data: listeSr,
+              }
+            ],
+          },
+          options: {
+            plugins: {
+              datalabels: {
+                display: true,
+                align: 'top',
+                color: "#ffffff",
+                backgroundColor: '#2e2e2e',
+                borderRadius: 3,
+              },
+            },
+            scales: {
+              y: {
+                suggestedMin: 1500,
+              }
+            }
+          },
+        })
+        
+        .setWidth(1000)
+        .setHeight(500)
+        .setBackgroundColor('transparent');
+
+        rankEmbed.setImage(await rankGen.getShortUrl())
+
+        message.channel.send(rankEmbed).then(sent => {
+          messageRank = sent
+          rankId = sent.id
+          messageRank.react("➡️")
+        })
+        break;
+
+      case "support":
+        type = "support"
+        listeProfile.sort((a, b) => (a.supportSr[a.supportSr.length - 1]) < (b.supportSr[b.supportSr.length - 1]) ? 1 : -1).slice(0, listeProfile.length).
+        forEach(e => {
+          i ++
+          if(e.supportSr[e.supportSr.length - 1] == 0) return
+          profils.push(e)
+          listeSr.push(e.supportSr[e.supportSr.length - 1])
+          listeNicknames.push(e.nickName)
+          if(i < 11) rankEmbed.addField(e.nickName, `${e.supportSr[e.supportSr.length - 1]}`)
+        });
+
+        rankEmbed.setThumbnail(profils[0].thumbnail)
+        rankGen = new ChartJsImage();
+        rankGen.setConfig({
+          type: 'line',
+          data: { statsProfil,
+            labels: listeNicknames,
+            datasets: [
+              {
+                label: 'Support SR', 
+                fill: false,
+                backgroundColor: "#c9f744",
+                borderColor: "#c9f744",
+                data: listeSr,
+              }
+            ],
+          },
+          options: {
+            plugins: {
+              datalabels: {
+                display: true,
+                align: 'top',
+                color: "#ffffff",
+                backgroundColor: '#2e2e2e',
+                borderRadius: 3,
+              },
+            },
+            scales: {
+              y: {
+                suggestedMin: 1500,
+              }
+            }
+          },
+        })
+        
+        .setWidth(1000)
+        .setHeight(500)
+        .setBackgroundColor('transparent');
+
+        rankEmbed.setImage(await rankGen.getShortUrl())
+
+        message.channel.send(rankEmbed).then(sent => {
+          messageRank = sent
+          rankId = sent.id
+          messageRank.react("➡️")
+        })
+        break;
+      
+      default:
+        type = "gen"
+        rankEmbed.setTitle("Classement général")
+
+        listeProfile.sort((a, b) => ((a.tankSr[a.tankSr.length - 1] + a.dpsSr[a.dpsSr.length - 1] + a.supportSr[a.supportSr.length - 1]) / 3 < (b.tankSr[b.tankSr.length - 1] + b.dpsSr[b.dpsSr.length - 1] + b.supportSr[b.supportSr.length - 1]) / 3) ? 1 : -1).splice(0, listeProfile.length).
+        forEach(e => {
+          i ++
+          if(Math.round((e.tankSr[e.tankSr.length - 1] + e.dpsSr[e.dpsSr.length - 1] + e.supportSr[e.supportSr.length - 1]) / 3) == 0) return
+          profils.push(e)
+          listeSr.push(Math.round((e.tankSr[e.tankSr.length - 1] + e.dpsSr[e.dpsSr.length - 1] + e.supportSr[e.supportSr.length - 1]) / 3))
+          listeNicknames.push(e.nickName)
+          if(i < 11) rankEmbed.addField(e.nickName, `${Math.round((e.tankSr[e.tankSr.length - 1] + e.dpsSr[e.dpsSr.length - 1] + e.supportSr[e.supportSr.length - 1]) / 3)}`)
+        })
+
+        rankEmbed.setThumbnail(profils[0].thumbnail)
+        rankGen = new ChartJsImage();
+        rankGen.setConfig({
+          type: 'line',
+          data: { statsProfil,
+            labels: listeNicknames,
+            datasets: [
+              {
+                label: 'Moyenne SR', 
+                fill: false,
+                backgroundColor: "#c9f744",
+                borderColor: "#c9f744",
+                data: listeSr,
+              }
+            ],
+          },
+          options: {
+            plugins: {
+              datalabels: {
+                display: true,
+                align: 'top',
+                color: "#ffffff",
+                backgroundColor: '#2e2e2e',
+                borderRadius: 3,
+              },
+            },
+            scales: {
+              y: {
+                suggestedMin: 1500,
+              }
+            }
+          },
+        })
+        
+        .setWidth(1000)
+        .setHeight(500)
+        .setBackgroundColor('transparent');
+
+        rankEmbed.setImage(await rankGen.getShortUrl())
+
+        message.channel.send(rankEmbed).then(sent => {
+          messageRank = sent
+          rankId = sent.id
+          messageRank.react("➡️")
+        })
+
+        break;
     }
   }
 
@@ -864,6 +1126,94 @@ bot.on('messageReactionAdd', async (reaction, user) => {
         messageDiff.reactions.removeAll()
         messageDiff.react("➡️")
       }
+    }
+  }else if(reaction.message.id == rankId) {
+    if(reaction.emoji.name == "➡️") {
+      await reaction.users.remove(user.id)
+      rankEmbed = new Discord.MessageEmbed()
+      rankEmbed.setColor(color)
+
+      pageRank ++
+      if((10 - ((pageRank * 10) - listeSr.length)) + 10 < 10) return pageRank --
+
+      switch (type) {
+        case "tank":
+          rankEmbed.setTitle("Classement Tank")
+          break;
+
+        case "dps":
+          rankEmbed.setTitle("Classement Dps")
+          break;
+
+        case "support":
+          rankEmbed.setTitle("Classement Support")
+          break;
+        
+        case "gen":
+          rankEmbed.setTitle("Classement général")
+        break;
+      }
+      for (let i = 0; i < (listeSr.length > (pageRank * 10) ? 10 : 10 - (((pageRank * 10)) - listeSr.length)) ; i++) {
+        rankEmbed.addField(profils[((pageRank * 10) + i) - 10].nickName, listeSr[((pageRank * 10) + i) - 10])
+      }
+
+      if(10 - (((pageRank * 10)) - listeSr.length) < 10) {
+        messageRank.reactions.removeAll()
+        messageRank.react("⬅️")
+      }else{
+
+      }
+
+      rankEmbed.setImage(await rankGen.getShortUrl())
+      rankEmbed.setThumbnail(profils[0].thumbnail)
+      messageRank.edit(rankEmbed)        
+
+      if(pageRank == 2) {
+        messageRank.reactions.removeAll()
+        messageRank.react("⬅️")
+        messageRank.react("➡️")
+      }
+
+    }else if(reaction.emoji.name == "⬅️") {
+      await reaction.users.remove(user.id)
+      rankEmbed = new Discord.MessageEmbed()
+      rankEmbed.setColor(color)
+
+      pageRank --
+      if(pageRank == 0) return pageRank ++
+
+      switch (type) {
+        case "tank":
+          rankEmbed.setTitle("Classement Tank")
+          break;
+
+        case "dps":
+          rankEmbed.setTitle("Classement Dps")
+          break;
+
+        case "support":
+          rankEmbed.setTitle("Classement Support")
+          break;
+        
+        case "gen":
+          rankEmbed.setTitle("Classement général")
+        break;
+      }
+      
+      for (let i = 0; i < (listeSr.length > pageRank * 10? 10 : 10 - ((pageRank * 10) - listeSr.length)) ; i++) {
+        rankEmbed.addField(profils[((pageRank * 10) + i) - 10].nickName, listeSr[((pageRank * 10) + i) - 10])
+      }
+
+      if(pageRank == 1) {
+        messageRank.reactions.removeAll()
+        messageRank.react("➡️")
+      }else{
+        messageRank.react("➡️")
+      }
+
+      rankEmbed.setImage(await rankGen.getShortUrl())
+      rankEmbed.setThumbnail(profils[0].thumbnail)
+      messageRank.edit(rankEmbed)        
     }
   }
 })
