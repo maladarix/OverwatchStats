@@ -390,6 +390,9 @@ bot.on("message", async (message) => {
       
       let account = await owapi.getModeStats(compte.urlName, "competitive", "pc")
       if(!account.hero_list.includes(args[1].toLowerCase().replace(":", ": "))) return message.reply(`Héro inconnu ou aucune données disponibles`)
+      let listeHeals = ["brigitte", "mercy", "lucio", "ana", "moira", "zenyatta"]
+      console.log("a")
+      console.log(listeHeals.includes(args[1]) ? "Heals / 10 min" : 'NON')
       let messageHeroStats = new Discord.MessageEmbed()
       .setTitle(`Stats de ${compte.name.split("#")[0]} avec ${capitalize(args[1].toUpperCase())}`)
       .setColor(color)
@@ -398,15 +401,15 @@ bot.on("message", async (message) => {
       .addFields(
         {name: "Temps de jeu", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['TimePlayed']}`, inline: false},
         {name: "WinRate", value: `${isNaN(((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']) * 100).toFixed(2)) ? 0 : ((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesWon'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']) * 100).toFixed(2)} %`, inline: false},
-        {name: "Kills", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "Morts", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "Ratio", value: `${(account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Eliminations'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['Deaths']).toFixed(2)}`, inline: true},
+        {name: "Kills / 10 min", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['EliminationsAvgper10Min'] || 0}`, inline: true},
+        {name: "Morts / 10 min", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['DeathsAvgper10Min'] || 0}`, inline: true},
+        {name: listeHeals.includes(args[1]) ? "Heals / 10 min" : '\u200b', value: listeHeals.includes(args[1]) ? `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['HealingDoneAvgper10Min'] || 0}` : '\u200b', inline: true},
+        {name: "Dmg fait par 10 min", value: `${(account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['HeroDamageDoneAvgper10Min']) == undefined ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['HeroDamageDoneAvgper10Min'])}`,inline: true},
+        {name: "Best dégat en une partie", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Best']['AllDamageDoneMostinGame'] == undefined ? 0 : account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Best']['AllDamageDoneMostinGame']}`,inline: true},
+        {name: `Moyenee "on fire"`, value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['TimeSpentonFireAvgper10Min'] == undefined ? 0 : account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['TimeSpentonFireAvgper10Min']} min`,inline: false},
         {name: "🥇", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsGold'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsGold'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsGold'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
         {name: "🥈", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsSilver'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsSilver'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsSilver'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
         {name: "🥉", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsBronze'] || 0} \n (${isNaN((account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsBronze'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)) ? 0 : (account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Match Awards']['MedalsBronze'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)})`, inline: true},
-        {name: "Dmg fait par partie", value: `${(account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Combat']['AllDamageDone'] / account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Game']['GamesPlayed']).toFixed(2)}`,inline: true},
-        {name: "Best dégat en une partie", value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Best']['AllDamageDoneMostinGame']}`,inline: true},
-        {name: `Moyenee "on fire"`, value: `${account.career_stats[args[1].toLowerCase().replace(":", ": ")]['Average']['TimeSpentonFireAvgper10Min']} min`,inline: false},
       )
       message.channel.send(messageHeroStats)
     } catch (err) {
@@ -1071,6 +1074,7 @@ bot.on("message", async (message) => {
       {name: "!herostats [battletag] [Héro]", value: `Affiche les stats d'un héro spécifique d'un joueur.`},
       {name: "!diff [battletag] [battletag] (Héro) ", value: `Affiche une comparaison entre 2 joueurs.`},
       {name: "!help ", value: `Pour avoir de l'aide à propos des commandes.`},
+      {name: "!rank (role)", value: `Montre le classement des joueurs du serveur.`}
     ))
   }
 })
