@@ -5,6 +5,7 @@ const Discord = require('discord.js');
 const Profil = require('./src/profil');
 const bot = new Discord.Client();
 var fs = require('fs');
+const Submit = require('./src/submit');
 require("dotenv").config()
 
 let channel = "944064019155804180" //"828518673244618752" 944064019155804180 <- off
@@ -33,12 +34,21 @@ let color = "c79304"
 let listeProfile = []
 let profils = []
 let listeNicknames = []
+let listeSubmit = []
 let listeSr = []
 fs.readFile('./src/data.json', "utf8", (err, jsonString) => {
   if(err) {
     console.log(err);
   }else{
     listeProfile = JSON.parse(jsonString);
+  }
+})
+
+fs.readFile('./src/top.json', "utf8", (err, jsonString) => {
+  if(err) {
+    console.log(err);
+  }else{
+    listeSubmit = JSON.parse(jsonString);
   }
 })
 
@@ -269,6 +279,42 @@ bot.on("message", async (message) => {
         console.log(err)
       }
     }
+  }
+
+  if(cmd == "sumbit") {
+    if(message.attachments.first() == undefined) return
+    if(message.attachments.first().name.split(".")[1] == "mp4") {
+      let multi = false
+      listeSubmit.some(submit => {
+        if(submit.name == message.attachments.first().name) {
+          multi = true
+        }
+      })
+
+      if(multi == false) {
+        listeSubmit.push(new Submit(message.attachments.first().url, message.member, message.attachments.first().name))
+
+        fs.writeFile('./src/top.json', JSON.stringify(listeSubmit), 'utf8', function(err) {
+          if (err) throw err;
+        })
+      }else{
+        message.channel.send("J'ai déjà ce clip!")
+      }
+    }
+  }
+
+  else if(cmd == "send") {
+    message.channel.send({files: 
+      [{
+          attachment: listeSubmit[0].url
+      }]
+     }).then(sent => sent.react("1️⃣"))
+
+     message.channel.send({files: 
+      [{
+          attachment: listeSubmit[1].url
+      }]
+     }).then(sent => sent.react("2️⃣"))
   }
 
   else if(cmd == "compstats") {
